@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,7 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -50,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
+import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -91,9 +93,11 @@ fun PushUpAppNavigation() {
             enterTransition = { fadeIn(tween(300)) },
             exitTransition = { fadeOut(tween(200)) }
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
+            composable(Screen.Home.route) { HomeScreen(navController) }
             composable(Screen.History.route) { Text("History") }
             composable(Screen.Profile.route) { Text("Profile") }
+            composable(Screen.QuickAdd.route) { Text("Quick Add") }
+            composable(Screen.StartWorkout.route) { StartWorkoutScreen(navController) }
         }
     }
 }
@@ -176,7 +180,7 @@ fun CustomBottomNavBar(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = screen.icon,
+                        imageVector = screen.icon ?: Icons.Default.AddCircleOutline,
                         contentDescription = screen.title,
                         modifier = Modifier
                             .size(24.dp)
