@@ -12,4 +12,5 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object Profile : Screen("profile", "Profile", Icons.Filled.Person)
     object QuickAdd : Screen("quickAdd", "Quick Add")
     object StartWorkout : Screen("startWorkout", "Start Workout")
+    object ThemeChangeView : Screen("themeChangeView", "Theme")
 }

@@ -44,15 +44,21 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
+import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileNavigation
+import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileScreen
+import com.cmp.pushuptracker.ui.screen.ProfileScreen.ThemeScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
+import com.cmp.pushuptracker.utils.Theme
+import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -63,14 +69,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PushupTrackerTheme {
+            val utilViewmodel = hiltViewModel<UtilViewmodel>()
+            val theme = utilViewmodel.theme
+            PushupTrackerTheme (
+                userSelectedTheme = theme
+            ) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(
                         modifier = Modifier.padding(
                             bottom = innerPadding.calculateBottomPadding(),
                         )
                     ) {
-                        PushUpAppNavigation()
+                        PushUpAppNavigation(utilViewmodel)
                     }
                 }
             }
@@ -81,7 +91,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PushUpAppNavigation() {
+fun PushUpAppNavigation(utilViewmodel: UtilViewmodel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { CustomBottomNavBar(navController) }
@@ -90,13 +100,13 @@ fun PushUpAppNavigation() {
             navController = navController,
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(200)) }
+            enterTransition = { fadeIn(tween(1000)) },
+            exitTransition = { fadeOut(tween(800)) }
         ) {
             composable(Screen.Home.route) { HomeScreen(navController) }
             composable(Screen.History.route) { Text("History") }
-            composable(Screen.Profile.route) { Text("Profile") }
             composable(Screen.QuickAdd.route) { Text("Quick Add") }
+            composable(Screen.Profile.route) { ProfileNavigation(utilViewmodel, navController) }
             composable(Screen.StartWorkout.route) { StartWorkoutScreen(navController) }
         }
     }
