@@ -31,7 +31,7 @@ import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 
 @Composable
-fun ExpandingFAB(navController: NavHostController) {
+fun ExpandingFAB(navController: NavHostController, openQuickAddSheet: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
@@ -73,7 +73,7 @@ fun ExpandingFAB(navController: NavHostController) {
                 SmallFloatingActionButton(
                     onClick = {
                         expanded = !expanded
-                        navController.navigate(Screen.QuickAdd.route)
+                        openQuickAddSheet()
                     },
                     containerColor = MaterialTheme.colorScheme.secondary
                 ) {

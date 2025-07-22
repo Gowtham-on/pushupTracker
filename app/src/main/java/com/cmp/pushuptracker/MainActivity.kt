@@ -52,12 +52,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileNavigation
-import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileScreen
-import com.cmp.pushuptracker.ui.screen.ProfileScreen.ThemeScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
-import com.cmp.pushuptracker.utils.Theme
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,7 +68,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val utilViewmodel = hiltViewModel<UtilViewmodel>()
             val theme = utilViewmodel.theme
-            PushupTrackerTheme (
+            PushupTrackerTheme(
                 userSelectedTheme = theme
             ) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -97,6 +94,7 @@ fun PushUpAppNavigation(utilViewmodel: UtilViewmodel) {
         bottomBar = { CustomBottomNavBar(navController) }
     ) { innerPadding ->
         AnimatedNavHost(
+            contentAlignment = Alignment.TopCenter,
             navController = navController,
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),

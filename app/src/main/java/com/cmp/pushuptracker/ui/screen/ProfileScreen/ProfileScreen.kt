@@ -52,45 +52,42 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 fun ProfileNavigation(utilViewmodel: UtilViewmodel, homeNavigation: NavHostController) {
     val profileNavController = rememberNavController()
     AnimatedNavHost(
+        contentAlignment = Alignment.TopCenter,
         navController = profileNavController,
         startDestination = Screen.Profile.route,
         enterTransition = {
             slideInHorizontally(
                 initialOffsetX = { fullWidth -> fullWidth },
-                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                animationSpec = tween(700, easing = FastOutSlowInEasing)
             )
         },
         exitTransition = {
             slideOutHorizontally(
                 targetOffsetX = { fullWidth -> -fullWidth },
-                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                animationSpec = tween(700, easing = FastOutSlowInEasing)
             )
         },
         popEnterTransition = {
             slideInHorizontally(
                 initialOffsetX = { fullWidth -> -fullWidth },
-                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                animationSpec = tween(700, easing = FastOutSlowInEasing)
             )
         },
         popExitTransition = {
             slideOutHorizontally(
                 targetOffsetX = { fullWidth -> fullWidth },
-                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                animationSpec = tween(700, easing = FastOutSlowInEasing)
             )
         }
     ) {
-        composable(
-            Screen.Profile.route,
-        ) {
+        composable(Screen.Profile.route) {
             ProfileScreen(
                 homeNavigation,
                 utilViewmodel,
                 profileNavController
             )
         }
-        composable(
-            Screen.ThemeChangeView.route,
-        ) {
+        composable(Screen.ThemeChangeView.route) {
             ThemeScreen(
                 profileNavController,
                 utilViewmodel
@@ -106,28 +103,26 @@ fun ProfileScreen(
     utilViewmodel: UtilViewmodel,
     profileNavController: NavHostController
 ) {
-    Scaffold {
-        Column(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.background
-                )
-        ) {
-            AppBar("Profile") {
-                homeNavController.popBackStack()
-            }
-
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                GetProfileSection()
-                Spacer(Modifier.height(20.dp))
-                GetStatsSection()
-                Spacer(Modifier.height(20.dp))
-                GetActionsSection(profileNavController)
-            }
-
+    Column(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.background
+            )
+    ) {
+        AppBar("Profile") {
+            homeNavController.popBackStack()
         }
+        Spacer(Modifier.height(10.dp))
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            GetProfileSection()
+            Spacer(Modifier.height(20.dp))
+            GetStatsSection()
+            Spacer(Modifier.height(20.dp))
+            GetActionsSection(profileNavController)
+        }
+
     }
 }
 

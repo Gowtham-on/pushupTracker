@@ -121,7 +121,13 @@ fun GetFormFields(title: String, value: (value: String, type: String) -> Unit) {
             singleLine = true,
             maxLines = 1,
             placeholder = {
-                Text("Enter $title")
+                Text(
+                    "Enter $title",
+                    fontFamily = workSansFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.outline
+                )
             },
             shape = RoundedCornerShape(12.dp)
 
@@ -192,7 +198,7 @@ fun GetInfoCard(totalReps: Int, interval: Int) {
     // Convert interval seconds to "X min Y sec"
     val minutes = interval / 60
     val seconds = interval % 60
-    val durationText = buildString {
+    val durationText = if (totalReps == 0) "0 sec" else buildString {
         if (minutes > 0) append("$minutes min")
         if (minutes > 0 && seconds > 0) append(" ")
         if (seconds > 0) append("$seconds sec")

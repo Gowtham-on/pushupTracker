@@ -1,7 +1,9 @@
 [versions]
 accompanistNavigationAnimation = "0.32.0"
 agp = "8.9.2"
+calendar = "1.3.0"
 cameraCamera2 = "1.4.2"
+composeMaterial3DatetimePickers = "0.7.2"
 hiltAndroid = "2.55"
 hiltCompiler = "2.55"
 hiltNavigationCompose = "1.2.0"
@@ -31,6 +33,8 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+calendar = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "calendar" }
+compose-material3-datetime-pickers = { module = "com.marosseleng.android:compose-material3-datetime-pickers", version.ref = "composeMaterial3DatetimePickers" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

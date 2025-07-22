@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cmp.pushuptracker"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -82,6 +82,9 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation (libs.calendar)
+
 
 
 }

@@ -20,4 +20,13 @@ object TimeUtils {
         return sdf.format(date)
     }
 
+    fun formatTimestamp(
+        millis: Long,
+        pattern: String,
+        locale: Locale = Locale.getDefault()
+    ): String {
+        val date = Date(millis)
+        val formatter = SimpleDateFormat(pattern, locale)
+        return formatter.format(date)
+    }
 }
