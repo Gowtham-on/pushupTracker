@@ -1,8 +1,6 @@
 package com.cmp.pushuptracker.utils
 
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -28,5 +26,17 @@ object TimeUtils {
         val date = Date(millis)
         val formatter = SimpleDateFormat(pattern, locale)
         return formatter.format(date)
+    }
+
+    fun getMinsSecFromSeconds(interval: Long): String {
+        val minutes = interval / 60
+        val seconds = interval % 60
+
+        return buildString {
+            if (minutes > 0) append("$minutes min")
+            if (minutes > 0 && seconds > 0) append(" ")
+            if (seconds > 0) append("$seconds sec")
+            if (minutes == 0L && seconds == 0L) append("0 sec")
+        }
     }
 }

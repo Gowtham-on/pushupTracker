@@ -23,9 +23,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,16 +40,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.R
+import com.cmp.pushuptracker.database.entity.UserEntity
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.theme.workSansFamily
+import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ProfileNavigation(utilViewmodel: UtilViewmodel, homeNavigation: NavHostController) {
+fun ProfileNavigation(
+    utilViewmodel: UtilViewmodel,
+    homeNavigation: NavHostController,
+    userViewmodel: UserViewmodel
+) {
     val profileNavController = rememberNavController()
     AnimatedNavHost(
         contentAlignment = Alignment.TopCenter,
@@ -83,8 +89,8 @@ fun ProfileNavigation(utilViewmodel: UtilViewmodel, homeNavigation: NavHostContr
         composable(Screen.Profile.route) {
             ProfileScreen(
                 homeNavigation,
-                utilViewmodel,
-                profileNavController
+                profileNavController,
+                userViewmodel
             )
         }
         composable(Screen.ThemeChangeView.route) {
@@ -100,9 +106,12 @@ fun ProfileNavigation(utilViewmodel: UtilViewmodel, homeNavigation: NavHostContr
 @Composable
 fun ProfileScreen(
     homeNavController: NavHostController,
-    utilViewmodel: UtilViewmodel,
-    profileNavController: NavHostController
+    profileNavController: NavHostController,
+    userViewmodel: UserViewmodel,
 ) {
+    val userData = userViewmodel.userData
+
+    // 2) pick the first (or default)
     Column(
         modifier = Modifier
             .background(
@@ -116,9 +125,9 @@ fun ProfileScreen(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            GetProfileSection()
+            GetProfileSection(userData)
             Spacer(Modifier.height(20.dp))
-            GetStatsSection()
+            GetStatsSection(userData)
             Spacer(Modifier.height(20.dp))
             GetActionsSection(profileNavController)
         }
@@ -128,7 +137,8 @@ fun ProfileScreen(
 
 
 @Composable
-fun GetProfileSection() {
+fun GetProfileSection(userData: UserEntity) {
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -141,7 +151,7 @@ fun GetProfileSection() {
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            "Ethan Carter",
+            if (userData.name.isBlank() == true) "User" else userData.name,
             fontFamily = workSansFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
@@ -151,14 +161,17 @@ fun GetProfileSection() {
 }
 
 @Composable
-fun GetStatsSection() {
+fun GetStatsSection(userData: UserEntity) {
+    val reps = remember { userData.totalReps }
+    val best = remember { userData.best }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        GetStatsCard("12,345", "Total\nReps", Modifier.weight(1f))
+        GetStatsCard(reps.toString(), "Total\nReps", Modifier.weight(1f))
         GetStatsCard("32", "Current\nStreak", Modifier.weight(1f))
-        GetStatsCard("150", "Personal\nBest", Modifier.weight(1f))
+        GetStatsCard(best.toString(), "Personal\nBest", Modifier.weight(1f))
     }
 }
 

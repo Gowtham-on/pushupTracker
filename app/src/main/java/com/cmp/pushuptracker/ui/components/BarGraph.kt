@@ -1,7 +1,5 @@
 package com.cmp.pushuptracker.ui.components
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,12 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,127 +25,99 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.vibrate
+
+private val DAYS_OF_WEEK = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 @Composable
 fun BarGraph(
-    listOfCounts: List<Int>,
+    counts: List<Int>,
     barColor: Color,
-    barLineThickness: Int = 1,
-    barLineColor: Color? = null
+    modifier: Modifier = Modifier
 ) {
+    // only recompute max when the list contents actually change
+    val maxCount = remember(counts) { counts.maxOrNull() ?: 1 }
+    var selectedIndex by remember { mutableStateOf(-1) }
 
-    val highestCount = remember(listOfCounts) { listOfCounts.maxOrNull() ?: 0 }
-
-    val selectedIndex = remember { mutableIntStateOf(-1) }
-
-    Box {
-        Column {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                listOfCounts.mapIndexed { index, it ->
-                    GetBarItem(
-                        it,
-                        (it.toDouble() / highestCount.toDouble()) * 200.0,
-                        barColor,
-                        index,
-                        selectedIndex.intValue,
-                        isSelected = selectedIndex.intValue == -1 || index == selectedIndex.intValue
-                    ) {
-                        selectedIndex.intValue = it
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-@Composable
-fun GetBarItem(
-    height: Int,
-    barHeight: Double,
-    barColor: Color,
-    index: Int,
-    selectedIndex: Int,
-    isSelected: Boolean,
-    onClick: (index: Int) -> Unit = {}
-) {
-    val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    var startAnimation by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-
-    val animatedHeight by animateDpAsState(
-        targetValue = if (startAnimation) barHeight.dp else 0.dp,
-        animationSpec = tween(durationMillis = 500),
-        label = "Bar Height Animation"
-    )
-
-    LaunchedEffect(Unit) {
-        startAnimation = true
-    }
-
-    Column(
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier.fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier
-                .height(225.dp)
-                .width(40.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (index == selectedIndex)
-                    Text(
-                        height.toString(),
-                        fontFamily = workSansFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(animatedHeight)
-                        .background(if (isSelected) barColor else barColor.copy(alpha = 0.25f))
-                        .clickable(
-                            onClick = {
-                                vibrate(context, 500)
-                                onClick(index)
-                            },
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        )
+        counts.forEachIndexed { index, count ->
+            key(index) {
+                BarGraphItem(
+                    count = count,
+                    maxCount = maxCount,
+                    barColor = barColor,
+                    isSelected = selectedIndex != -1 && selectedIndex == index,
+                    selectedIndex = selectedIndex,
+                    onClick = { selectedIndex = index },
+                    dayLabel = DAYS_OF_WEEK[index]
                 )
             }
         }
+    }
+}
+
+@Composable
+fun BarGraphItem(
+    count: Int,
+    maxCount: Int,
+    barColor: Color,
+    isSelected: Boolean,
+    selectedIndex: Int,
+    onClick: () -> Unit,
+    dayLabel: String
+) {
+    val context = LocalContext.current
+
+    // one shared source per item
+    val interactionSource = remember { MutableInteractionSource() }
+
+    // direct Dp calculation
+    val targetDp = (count / maxCount.toFloat() * 200.dp.value).dp
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                onClick()
+                vibrate(context, 50)
+            }
+            .width(40.dp)
+    ) {
+        // show the number only if selected
+        Text(
+            text = if (isSelected) count.toString() else "",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .height(targetDp)
+                .fillMaxWidth()
+                .background(
+                    color = if (isSelected || selectedIndex == -1) barColor else barColor.copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
 
         Spacer(Modifier.height(8.dp))
 
         Text(
-            daysOfWeek[index],
-            fontFamily = workSansFamily,
-            fontWeight = FontWeight.Normal,
+            text = dayLabel,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
     }
-}
-
-@Preview
-@Composable
-fun BarGraphPreview() {
-    var list = listOf(100, 120, 60, 160, 260, 30, 90)
-    BarGraph(list, MaterialTheme.colorScheme.secondary)
 }

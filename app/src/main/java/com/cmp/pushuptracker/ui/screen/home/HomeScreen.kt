@@ -1,9 +1,7 @@
 package com.cmp.pushuptracker.ui.screen.home
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +29,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.ui.components.BarGraph
@@ -54,6 +54,11 @@ import com.cmp.pushuptracker.ui.components.ExpandingFAB
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.TimeUtils
+import com.cmp.pushuptracker.utils.calculateWeeklyCount
+import com.cmp.pushuptracker.utils.estimatePushupCalories
+import com.cmp.pushuptracker.utils.getWeeklyReps
+import com.cmp.pushuptracker.viewmodel.PushupViewModel
+import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -62,10 +67,18 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.Locale
+import kotlin.math.abs
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    navController: NavHostController,
+    pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>(),
+    userViewmodel: UserViewmodel
+) {
+    val pushupData = pushupViewModel.todayData
+    val pushups by pushupViewModel.pushupData.collectAsState(initial = emptyList())
 
     var showQuickAddShet by remember { mutableStateOf(false) }
 
@@ -111,19 +124,25 @@ fun HomeScreen(navController: NavHostController) {
                     ) {
                         GetHomePushupCard(
                             "Reps",
-                            "120",
+                            (pushupData?.reps ?: 0).toString(),
                             "Push-Ups",
                             illustrationType = PushupIllustrations.ONE
                         )
                         GetHomePushupCard(
                             "Time",
-                            "15-min",
+                            (TimeUtils.getMinsSecFromSeconds(
+                                pushupData?.duration?.toLong() ?: 0L
+                            )).toString(),
                             "Workout duration",
                             illustrationType = PushupIllustrations.TWO
                         )
                         GetHomePushupCard(
                             "Calories",
-                            "250",
+                            estimatePushupCalories(
+                                reps = pushupData?.reps ?: 0,
+                                durationSec = pushupData?.duration ?: 0,
+                                weightKg = 70.0,
+                            ),
                             "Estimated Calories burnt",
                             illustrationType = PushupIllustrations.THREE
                         )
@@ -147,23 +166,21 @@ fun HomeScreen(navController: NavHostController) {
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            "500",
+                            calculateWeeklyCount(pushups).toString(),
                             fontFamily = workSansFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
-                    BarGraph(
-                        listOfCounts = listOf(100, 200, 300, 400, 500, 600, 700),
-                        barColor = MaterialTheme.colorScheme.primary,
-                        barLineThickness = 2
-                    )
+                    if (pushups.isNotEmpty())
+                        BarGraph(
+                            counts = getWeeklyReps(pushups),
+                            barColor = MaterialTheme.colorScheme.primary,
+                        )
                     Spacer(Modifier.height(12.dp))
                     if (showQuickAddShet)
-                        GetQuickAddSheet(
-                            onSubmit = {}
-                        ) {
+                        GetQuickAddSheet(pushupViewModel, userViewmodel) {
                             showQuickAddShet = false
                         }
                 }
@@ -203,13 +220,15 @@ fun GetHomePushupCard(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.outline
             )
+            Spacer(Modifier.height(4.dp))
             Text(
                 count,
                 fontFamily = workSansFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(Modifier.height(4.dp))
             Text(
                 desc,
                 fontFamily = workSansFamily,
@@ -234,12 +253,28 @@ fun GetHomePushupCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GetQuickAddSheet(onSubmit: () -> Unit, onDismiss: () -> Unit) {
+fun GetQuickAddSheet(
+    pushupViewModel: PushupViewModel,
+    userViewmodel: UserViewmodel,
+    onDismiss: () -> Unit,
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
     var reps by remember { mutableStateOf("") }
+    var sets by remember { mutableStateOf("") }
     var min by remember { mutableStateOf("") }
     var secs by remember { mutableStateOf("") }
+
+    val pushups by pushupViewModel.pushupData.collectAsState(initial = emptyList())
+
+    // 2) derive the single record for the date
+    val pushupData by remember(pushups, selectedDate) {
+        derivedStateOf {
+            pushups.firstOrNull { it.date == selectedDate }
+        }
+    }
+
+    val userData = userViewmodel.userData
 
     Column {
         ModalBottomSheet(
@@ -259,6 +294,8 @@ fun GetQuickAddSheet(onSubmit: () -> Unit, onDismiss: () -> Unit) {
                 )
                 Spacer(Modifier.padding(vertical = 10.dp))
                 GetSheetTextField(title = "Reps", onTextChange = { reps = it })
+                Spacer(Modifier.padding(vertical = 10.dp))
+                GetSheetTextField(title = "Sets", onTextChange = { sets = it })
                 Spacer(Modifier.padding(vertical = 10.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -282,7 +319,31 @@ fun GetQuickAddSheet(onSubmit: () -> Unit, onDismiss: () -> Unit) {
                 }
                 Spacer(Modifier.padding(vertical = 10.dp))
                 Button(
-                    onClick = {},
+                    onClick = {
+                        if (reps.isNotBlank()
+                            && sets.isNotBlank()
+                            && min.isNotBlank()
+                            && secs.isNotBlank()
+                            && selectedDate.isNotBlank()
+                        ) {
+                            if (pushupData != null) {
+                                var todayChanges = abs(pushupData!!.reps - reps.toInt())
+                                val user = userData
+                                user.totalReps += todayChanges.toInt()
+                                if (user.best < todayChanges.toInt() == true) {
+                                    user.best = todayChanges.toInt()
+                                }
+                                userViewmodel.updateUserData(userData)
+                            }
+                            pushupViewModel.addPushupRecord(
+                                reps = reps.toInt(),
+                                sets = sets.toInt(),
+                                duration = (min.toInt() * 60) + secs.toInt(),
+                                date = selectedDate
+                            )
+                            onDismiss()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -382,7 +443,6 @@ fun GetDatePickerField(selectedDate: String, onClick: () -> Unit = {}) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun QuickAddCalendar(
@@ -396,6 +456,7 @@ internal fun QuickAddCalendar(
         state = rememberUseCaseState(
             visible = true,
             onCloseRequest = { closeSelection() },
+            onDismissRequest = {},
             onFinishedRequest = {
                 if (selectedDate.value.size == 1) {
                     val date: LocalDate = selectedDate.value.first()
@@ -405,12 +466,14 @@ internal fun QuickAddCalendar(
                         .toEpochMilli()
 
                     onSubmit(epochMillis)
-                } else if (selectedDate.value.size == 1) {
+                } else if (selectedDate.value.size > 1) {
                     Toast.makeText(context, "Select only one Date", Toast.LENGTH_SHORT).show()
+                    return@rememberUseCaseState
                 }
             }),
         config = CalendarConfig(
-            yearSelection = true,
+            locale = Locale.getDefault(),
+            yearSelection = false,
             monthSelection = true,
             style = CalendarStyle.MONTH,
         ),

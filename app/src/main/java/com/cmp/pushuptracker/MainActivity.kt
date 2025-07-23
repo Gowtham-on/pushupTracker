@@ -55,6 +55,7 @@ import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
+import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,6 +68,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val utilViewmodel = hiltViewModel<UtilViewmodel>()
+            val userViewmodel = hiltViewModel<UserViewmodel>()
             val theme = utilViewmodel.theme
             PushupTrackerTheme(
                 userSelectedTheme = theme
@@ -77,7 +79,7 @@ class MainActivity : ComponentActivity() {
                             bottom = innerPadding.calculateBottomPadding(),
                         )
                     ) {
-                        PushUpAppNavigation(utilViewmodel)
+                        PushUpAppNavigation(utilViewmodel, userViewmodel)
                     }
                 }
             }
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PushUpAppNavigation(utilViewmodel: UtilViewmodel) {
+fun PushUpAppNavigation(utilViewmodel: UtilViewmodel, userViewmodel: UserViewmodel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { CustomBottomNavBar(navController) }
@@ -101,10 +103,16 @@ fun PushUpAppNavigation(utilViewmodel: UtilViewmodel) {
             enterTransition = { fadeIn(tween(1000)) },
             exitTransition = { fadeOut(tween(800)) }
         ) {
-            composable(Screen.Home.route) { HomeScreen(navController) }
+            composable(Screen.Home.route) { HomeScreen(navController, userViewmodel = userViewmodel) }
             composable(Screen.History.route) { Text("History") }
             composable(Screen.QuickAdd.route) { Text("Quick Add") }
-            composable(Screen.Profile.route) { ProfileNavigation(utilViewmodel, navController) }
+            composable(Screen.Profile.route) {
+                ProfileNavigation(
+                    utilViewmodel,
+                    navController,
+                    userViewmodel
+                )
+            }
             composable(Screen.StartWorkout.route) { StartWorkoutScreen(navController) }
         }
     }

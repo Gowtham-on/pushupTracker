@@ -1,9 +1,8 @@
 [versions]
 accompanistNavigationAnimation = "0.32.0"
 agp = "8.9.2"
-calendar = "1.3.0"
+calendar = "1.2.1"
 cameraCamera2 = "1.4.2"
-composeMaterial3DatetimePickers = "0.7.2"
 hiltAndroid = "2.55"
 hiltCompiler = "2.55"
 hiltNavigationCompose = "1.2.0"
@@ -18,6 +17,9 @@ composeBom = "2024.09.00"
 navigationCompose = "2.9.2"
 poseDetection = "18.0.0-beta5"
 poseDetectionAccurate = "18.0.0-beta5"
+roomCompiler = "2.7.2"
+roomKtx = "2.7.2"
+roomRuntime = "2.7.2"
 tasksVision = "0.20230731"
 constraintlayout = "2.2.1"
 hiltAndroidGradlePlugin = "2.51"
@@ -33,8 +35,10 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 calendar = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "calendar" }
-compose-material3-datetime-pickers = { module = "com.marosseleng.android:compose-material3-datetime-pickers", version.ref = "composeMaterial3DatetimePickers" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

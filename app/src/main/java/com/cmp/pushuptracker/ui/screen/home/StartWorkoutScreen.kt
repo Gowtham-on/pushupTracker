@@ -45,6 +45,7 @@ import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.components.RestIntervalSlider
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.LivePreviewActivity
 import com.cmp.pushuptracker.ui.theme.workSansFamily
+import com.cmp.pushuptracker.utils.TimeUtils
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -195,15 +196,9 @@ fun GetInfoCard(totalReps: Int, interval: Int) {
         animationSpec = tween(durationMillis = 1000)
     )
 
-    // Convert interval seconds to "X min Y sec"
-    val minutes = interval / 60
-    val seconds = interval % 60
-    val durationText = if (totalReps == 0) "0 sec" else buildString {
-        if (minutes > 0) append("$minutes min")
-        if (minutes > 0 && seconds > 0) append(" ")
-        if (seconds > 0) append("$seconds sec")
-        if (minutes == 0 && seconds == 0) append("0 sec")
-    }
+    val durationText =
+        if (totalReps == 0) "0 sec"
+        else TimeUtils.getMinsSecFromSeconds(interval.toLong())
 
     Box(
         modifier = Modifier
