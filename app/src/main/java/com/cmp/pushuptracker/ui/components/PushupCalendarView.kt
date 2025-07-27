@@ -45,7 +45,9 @@ fun GetHabitCalendarView(
     pushupMap: Map<String, PushUpEntity>,
     onClick: (PushUpEntity?) -> Unit
 ) {
-    val days = TimeUtils.getDateRangeLastSundayToThisSaturday("dd/MM/YYYY", 13)
+    val days = remember {
+        TimeUtils.getDateRangeLastSundayToThisSaturday("dd/MM/YYYY", 13)
+    }
     val daysList = remember {
         listOf(
             "Su",
