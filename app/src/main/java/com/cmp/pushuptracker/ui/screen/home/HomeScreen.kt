@@ -27,10 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -172,13 +173,24 @@ fun HomeScreen(
                             fontSize = 22.sp,
                             color = MaterialTheme.colorScheme.onBackground
                         )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "This Week",
+                            fontFamily = workSansFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                     if (pushups.isNotEmpty())
                         BarGraph(
                             counts = getWeeklyReps(pushups),
                             barColor = MaterialTheme.colorScheme.primary,
                         )
+                    Spacer(Modifier.height(20.dp))
+                    GetHomeSection(userViewmodel, pushupViewModel)
                     Spacer(Modifier.height(12.dp))
+
                     if (showQuickAddShet)
                         GetQuickAddSheet(pushupViewModel, userViewmodel) {
                             showQuickAddShet = false
@@ -196,7 +208,8 @@ fun GetHomePushupCard(
     count: String,
     desc: String,
     modifier: Modifier = Modifier,
-    illustrationType: PushupIllustrations
+    illustrationType: PushupIllustrations,
+    canShowIllustration: Boolean = true
 ) {
     val illustration = remember {
         when (illustrationType) {
@@ -238,16 +251,17 @@ fun GetHomePushupCard(
             )
         }
 
-        Image(
-            painter = painterResource(illustration),
-            contentDescription = "Illustration",
-            modifier = modifier
-                .clip(RoundedCornerShape(12.dp))
-                .height(70.dp)
-                .width(130.dp),
-            alignment = Alignment.CenterEnd,
-            contentScale = ContentScale.Crop
-        )
+        if (canShowIllustration)
+            Image(
+                painter = painterResource(illustration),
+                contentDescription = "Illustration",
+                modifier = modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .height(70.dp)
+                    .width(130.dp),
+                alignment = Alignment.CenterEnd,
+                contentScale = ContentScale.Crop
+            )
     }
 }
 
@@ -262,111 +276,101 @@ fun GetQuickAddSheet(
     var selectedDate by remember { mutableStateOf("") }
     var reps by remember { mutableStateOf("") }
     var sets by remember { mutableStateOf("") }
-    var min by remember { mutableStateOf("") }
-    var secs by remember { mutableStateOf("") }
+    var min by remember { mutableStateOf("0") }
+    var secs by remember { mutableStateOf("0") }
 
-    val pushups by pushupViewModel.pushupData.collectAsState(initial = emptyList())
-
-    // 2) derive the single record for the date
-    val pushupData by remember(pushups, selectedDate) {
-        derivedStateOf {
-            pushups.firstOrNull { it.date == selectedDate }
-        }
-    }
-
+    val pushupData = pushupViewModel.selectedDayData
     val userData = userViewmodel.userData
 
-    Column {
-        ModalBottomSheet(
-            onDismissRequest = {
-                onDismiss()
-            },
-            containerColor = MaterialTheme.colorScheme.background,
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismiss()
+        },
+        sheetState = rememberModalBottomSheetState( skipPartiallyExpanded= true),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp)
+            Text(
+                "Quick add your progress", fontFamily = workSansFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.padding(vertical = 10.dp))
+            GetSheetTextField(title = "Reps", onTextChange = { reps = it })
+            Spacer(Modifier.padding(vertical = 10.dp))
+            GetSheetTextField(title = "Sets", onTextChange = { sets = it })
+            Spacer(Modifier.padding(vertical = 10.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(15.dp)
+            ) {
+                GetSheetTextField(
+                    modifier = Modifier.weight(1f),
+                    "Min",
+                    onTextChange = { min = it },
+                    R.drawable.timer_two
+                )
+                GetSheetTextField(
+                    modifier = Modifier.weight(1f),
+                    "Seconds",
+                    onTextChange = { secs = it },
+                    R.drawable.timer_two
+                )
+            }
+            Spacer(Modifier.padding(vertical = 10.dp))
+            GetDatePickerField(selectedDate) {
+                showDatePicker = true
+            }
+            Spacer(Modifier.padding(vertical = 10.dp))
+            Button(
+                onClick = {
+                    if (reps.isNotBlank()
+                        && sets.isNotBlank()
+                        && selectedDate.isNotBlank()
+                    ) {
+                        if (pushupData != null) {
+                            var todayChanges = abs(pushupData.reps - reps.toInt())
+                            val user = userData
+                            user.totalReps += todayChanges.toInt()
+                            if (user.best < todayChanges.toInt() == true) {
+                                user.best = todayChanges.toInt()
+                            }
+                            userViewmodel.updateUserData(userData)
+                        }
+                        pushupViewModel.addPushupRecord(
+                            reps = reps.toInt(),
+                            sets = sets.toInt(),
+                            duration = (min.toInt() * 60) + secs.toInt(),
+                            date = selectedDate
+                        )
+                        onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Quick add your progress", fontFamily = workSansFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    "Save",
+                    fontFamily = workSansFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .padding(vertical = 6.dp)
                 )
-                Spacer(Modifier.padding(vertical = 10.dp))
-                GetSheetTextField(title = "Reps", onTextChange = { reps = it })
-                Spacer(Modifier.padding(vertical = 10.dp))
-                GetSheetTextField(title = "Sets", onTextChange = { sets = it })
-                Spacer(Modifier.padding(vertical = 10.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    GetSheetTextField(
-                        modifier = Modifier.weight(1f),
-                        "Min",
-                        onTextChange = { min = it },
-                        R.drawable.timer_two
-                    )
-                    GetSheetTextField(
-                        modifier = Modifier.weight(1f),
-                        "Seconds",
-                        onTextChange = { secs = it },
-                        R.drawable.timer_two
-                    )
-                }
-                Spacer(Modifier.padding(vertical = 10.dp))
-                GetDatePickerField(selectedDate) {
-                    showDatePicker = true
-                }
-                Spacer(Modifier.padding(vertical = 10.dp))
-                Button(
-                    onClick = {
-                        if (reps.isNotBlank()
-                            && sets.isNotBlank()
-                            && min.isNotBlank()
-                            && secs.isNotBlank()
-                            && selectedDate.isNotBlank()
-                        ) {
-                            if (pushupData != null) {
-                                var todayChanges = abs(pushupData!!.reps - reps.toInt())
-                                val user = userData
-                                user.totalReps += todayChanges.toInt()
-                                if (user.best < todayChanges.toInt() == true) {
-                                    user.best = todayChanges.toInt()
-                                }
-                                userViewmodel.updateUserData(userData)
-                            }
-                            pushupViewModel.addPushupRecord(
-                                reps = reps.toInt(),
-                                sets = sets.toInt(),
-                                duration = (min.toInt() * 60) + secs.toInt(),
-                                date = selectedDate
-                            )
-                            onDismiss()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "Save",
-                        fontFamily = workSansFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier
-                            .padding(vertical = 6.dp)
-                    )
-                }
-                Spacer(Modifier.padding(vertical = 10.dp))
             }
-            if (showDatePicker)
-                QuickAddCalendar(
-                    onSubmit = {
-                        selectedDate = TimeUtils.formatTimestamp(it, "dd/MM/yyyy")
-                    }
-                ) {
-                    showDatePicker = false
-                }
+            Spacer(Modifier.padding(vertical = 10.dp))
         }
+        if (showDatePicker)
+            QuickAddCalendar(
+                onSubmit = {
+                    selectedDate = TimeUtils.formatTimestamp(it, "dd/MM/yyyy")
+                    pushupViewModel.getRecordByDate(selectedDate)
+                }
+            ) {
+                showDatePicker = false
+            }
     }
 }
 

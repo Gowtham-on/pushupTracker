@@ -68,7 +68,7 @@ dependencies {
 
     implementation(libs.pose.detection)
     // Pose detection with accurate models
-    implementation (libs.pose.detection.accurate)
+    implementation(libs.pose.detection.accurate)
 
     // Material 3
     implementation(libs.material3)
@@ -83,13 +83,16 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation (libs.calendar)
+    implementation(libs.calendar)
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
+    implementation(libs.heatmap)
 
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.mpandroidchart)
 
 
 }

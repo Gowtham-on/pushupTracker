@@ -139,7 +139,7 @@ fun GetFormFields(title: String, value: (value: String, type: String) -> Unit) {
 
 @Composable
 fun GetSliderField(interval: (interval: Int) -> Unit) {
-    var sliderValue by remember { mutableIntStateOf(30) }
+    var sliderValue by remember { mutableIntStateOf(0) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),

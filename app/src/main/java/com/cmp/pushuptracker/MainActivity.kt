@@ -52,9 +52,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileNavigation
+import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
+import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -90,7 +92,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PushUpAppNavigation(utilViewmodel: UtilViewmodel, userViewmodel: UserViewmodel) {
+fun PushUpAppNavigation(
+    utilViewmodel: UtilViewmodel,
+    userViewmodel: UserViewmodel,
+    hiltViewModel: PushupViewModel = hiltViewModel<PushupViewModel>()
+) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { CustomBottomNavBar(navController) }
@@ -103,9 +109,16 @@ fun PushUpAppNavigation(utilViewmodel: UtilViewmodel, userViewmodel: UserViewmod
             enterTransition = { fadeIn(tween(1000)) },
             exitTransition = { fadeOut(tween(800)) }
         ) {
-            composable(Screen.Home.route) { HomeScreen(navController, userViewmodel = userViewmodel) }
-            composable(Screen.History.route) { Text("History") }
-            composable(Screen.QuickAdd.route) { Text("Quick Add") }
+            composable(Screen.Home.route) {
+                HomeScreen(
+                    navController,
+                    hiltViewModel,
+                    userViewmodel = userViewmodel
+                )
+            }
+            composable(Screen.History.route) {
+                HistoryScreen(navController, hiltViewModel)
+            }
             composable(Screen.Profile.route) {
                 ProfileNavigation(
                     utilViewmodel,

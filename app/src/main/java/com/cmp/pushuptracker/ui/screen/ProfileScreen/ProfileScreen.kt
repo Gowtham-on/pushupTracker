@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -111,7 +114,6 @@ fun ProfileScreen(
 ) {
     val userData = userViewmodel.userData
 
-    // 2) pick the first (or default)
     Column(
         modifier = Modifier
             .background(
@@ -147,8 +149,16 @@ fun GetProfileSection(userData: UserEntity) {
             modifier = Modifier
                 .clip(CircleShape)
                 .size(125.dp)
-                .background(color = MaterialTheme.colorScheme.secondary)
-        )
+                .background(color = MaterialTheme.colorScheme.outline)
+        ) {
+            Icon(
+                imageVector = Icons.Default.PhotoCamera,
+                contentDescription = "Profile Pic",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(30.dp)
+            )
+        }
         Spacer(Modifier.height(12.dp))
         Text(
             if (userData.name.isBlank() == true) "User" else userData.name,
@@ -170,7 +180,7 @@ fun GetStatsSection(userData: UserEntity) {
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         GetStatsCard(reps.toString(), "Total\nReps", Modifier.weight(1f))
-        GetStatsCard("32", "Current\nStreak", Modifier.weight(1f))
+//        GetStatsCard("32", "Calories\nBurnt", Modifier.weight(1f))
         GetStatsCard(best.toString(), "Personal\nBest", Modifier.weight(1f))
     }
 }

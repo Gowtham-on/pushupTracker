@@ -2,6 +2,7 @@ package com.cmp.pushuptracker.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,16 +29,23 @@ class PushupViewModel @Inject constructor(
         )
 
     var todayData by mutableStateOf<PushUpEntity?>(null)
+        private set
+
+    var selectedDayData by mutableStateOf<PushUpEntity?>(null)
+        private set
 
     init {
         val today = TimeUtils.getTodayDate("dd/MM/yyyy")
-        getRecordByDate(today)
+        viewModelScope.launch {
+            repository.getSessionByDate(today)?.collect {
+                todayData = it
+            }
+        }
     }
 
     fun addPushupRecord(reps: Int, duration: Int, sets: Int, date: String) {
         viewModelScope.launch {
             repository.addSession(date, reps, duration, sets)
-            getRecordByDate(date)
         }
     }
 
@@ -56,7 +64,7 @@ class PushupViewModel @Inject constructor(
     fun getRecordByDate(date: String) {
         viewModelScope.launch {
             repository.getSessionByDate(date)?.collect {
-                todayData = it
+                selectedDayData = it
             }
         }
     }
