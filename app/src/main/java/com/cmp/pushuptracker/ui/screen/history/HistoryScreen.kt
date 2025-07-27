@@ -1,13 +1,11 @@
 package com.cmp.pushuptracker.ui.screen.history
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +35,7 @@ fun HistoryScreen(
             newValue = pushupDataState.associateBy { it.date }
         )
 
-        Column (
+        Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
         ) {
@@ -53,7 +51,7 @@ fun HistoryScreen(
             GetDurationChart(datePushupMap)
             Spacer(Modifier.height(16.dp))
             GetRepsChart(datePushupMap)
-
+            Spacer(Modifier.height(16.dp))
             if (selectedDate != null && canShowInfoBottomSheet)
                 InfoBottomSheet(selectedDate) {
                     canShowInfoBottomSheet = false

@@ -53,7 +53,9 @@ fun GetRepsChart(datePushupMap: Map<String, PushUpEntity>) {
         color = MaterialTheme.colorScheme.onBackground
     )
     Card(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),

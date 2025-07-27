@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cmp.pushuptracker.database.entity.PushUpEntity
+import com.cmp.pushuptracker.utils.vibrate
 import com.fleeys.heatmap.HeatMap
 import com.fleeys.heatmap.model.Heat
 import com.fleeys.heatmap.style.DaysLabelStyle
@@ -34,6 +36,8 @@ fun GetHeatMap(datePushupMap: Map<String, PushUpEntity>, onHeatClick: (PushUpEnt
     val heats = remember(datePushupMap) {
         generateHeats(datePushupMap)
     }
+
+    val context = LocalContext.current
 
     HeatMap(
         data = heats,
@@ -60,8 +64,8 @@ fun GetHeatMap(datePushupMap: Map<String, PushUpEntity>, onHeatClick: (PushUpEnt
             )
         ),
     ) {
+        vibrate(context)
         onHeatClick(it.data)
-
     }
 }
 

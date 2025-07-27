@@ -2,6 +2,7 @@ package com.cmp.pushuptracker.ui.components
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,7 +48,12 @@ fun LineChartCompose(
                 description = Description().apply { text = "" }
 
                 axisRight.isEnabled = false
-                axisLeft.isEnabled = false
+                axisLeft.isEnabled = true
+                axisLeft.apply {
+                    textColor = onBackgroundColor
+                    textSize = 12f
+                    setDrawGridLines(false)
+                }
 
                 xAxis.apply {
                     position = XAxis.XAxisPosition.BOTTOM
@@ -66,9 +72,9 @@ fun LineChartCompose(
 
                 // Touch interactions
                 setTouchEnabled(false)
-                isDragEnabled = true
+                isDragEnabled = false
                 setScaleEnabled(false)
-                setPinchZoom(true)
+                setPinchZoom(false)
                 marker = CustomMarkerView(context, R.layout.marker_view).apply {
                     setTextColor(onBackgroundColor)
                 }
@@ -89,6 +95,7 @@ fun LineChartCompose(
                 setDrawFilled(true)
                 fillColor = lineColorAlpha
                 fillAlpha = 40
+                valueFormatter = ZeroHidingValueFormatter()
             }
 
             chart.extraBottomOffset = 10f
@@ -121,6 +128,12 @@ class CustomMarkerView(context: Context, layoutResource: Int) :
 
 class XAxisValueFormatter(val xAxisValues: List<String>) : ValueFormatter() {
     override fun getFormattedValue(value: Float): String {
-        return xAxisValues[value.toInt()]
+        return xAxisValues.getOrNull(value.toInt()) ?: ""
+    }
+}
+
+class ZeroHidingValueFormatter : ValueFormatter() {
+    override fun getFormattedValue(value: Float): String {
+        return if (value == 0f) "" else value.toInt().toString()
     }
 }

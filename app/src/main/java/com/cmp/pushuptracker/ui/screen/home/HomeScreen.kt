@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -50,14 +49,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
-import com.cmp.pushuptracker.ui.components.BarGraph
 import com.cmp.pushuptracker.ui.components.ExpandingFAB
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.TimeUtils
-import com.cmp.pushuptracker.utils.calculateWeeklyCount
 import com.cmp.pushuptracker.utils.estimatePushupCalories
-import com.cmp.pushuptracker.utils.getWeeklyReps
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
@@ -79,124 +75,75 @@ fun HomeScreen(
     userViewmodel: UserViewmodel
 ) {
     val pushupData = pushupViewModel.todayData
-    val pushups by pushupViewModel.pushupData.collectAsState(initial = emptyList())
-
     var showQuickAddShet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        floatingActionButton = {
-            ExpandingFAB(navController) {
-                showQuickAddShet = true
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End
-    ) { innerPadding ->
-
-        Box {
+    Box {
+        Column(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.background
+                )
+                .padding(horizontal = 16.dp)
+        ) {
+            Spacer(Modifier.height(15.dp))
+            Text(
+                "Push-Up Tracker",
+                fontFamily = workSansFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(24.dp))
             Column(
                 modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.background
-                    )
-                    .padding(horizontal = 16.dp)
+                    .verticalScroll(state = rememberScrollState()),
             ) {
-                Spacer(Modifier.height(15.dp))
                 Text(
-                    "Push-Up Tracker",
+                    "Today, ${TimeUtils.getTodayDate("MMMM dd")}",
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
+                    fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Spacer(Modifier.height(24.dp))
                 Column(
-                    modifier = Modifier
-                        .verticalScroll(state = rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
-                        "Today, ${TimeUtils.getTodayDate("MMMM dd")}",
-                        fontFamily = workSansFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                    GetHomePushupCard(
+                        "Reps",
+                        (pushupData?.reps ?: 0).toString(),
+                        "Push-Ups",
+                        illustrationType = PushupIllustrations.ONE
                     )
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        GetHomePushupCard(
-                            "Reps",
-                            (pushupData?.reps ?: 0).toString(),
-                            "Push-Ups",
-                            illustrationType = PushupIllustrations.ONE
-                        )
-                        GetHomePushupCard(
-                            "Time",
-                            (TimeUtils.getMinsSecFromSeconds(
-                                pushupData?.duration?.toLong() ?: 0L
-                            )).toString(),
-                            "Workout duration",
-                            illustrationType = PushupIllustrations.TWO
-                        )
-                        GetHomePushupCard(
-                            "Calories",
-                            estimatePushupCalories(
-                                reps = pushupData?.reps ?: 0,
-                                durationSec = pushupData?.duration ?: 0,
-                                weightKg = 70.0,
-                            ),
-                            "Estimated Calories burnt",
-                            illustrationType = PushupIllustrations.THREE
-                        )
-                    }
-                    Spacer(Modifier.height(24.dp))
-                    Text(
-                        "Weekly Goals",
-                        fontFamily = workSansFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                    GetHomePushupCard(
+                        "Time",
+                        (TimeUtils.getMinsSecFromSeconds(
+                            pushupData?.duration?.toLong() ?: 0L
+                        )).toString(),
+                        "Workout duration",
+                        illustrationType = PushupIllustrations.TWO
                     )
-                    Spacer(Modifier.height(12.dp))
-                    Column {
-                        Text(
-                            "Push-Ups",
-                            fontFamily = workSansFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            calculateWeeklyCount(pushups).toString(),
-                            fontFamily = workSansFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            "This Week",
-                            fontFamily = workSansFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    if (pushups.isNotEmpty())
-                        BarGraph(
-                            counts = getWeeklyReps(pushups),
-                            barColor = MaterialTheme.colorScheme.primary,
-                        )
-                    Spacer(Modifier.height(20.dp))
-                    GetHomeSection(userViewmodel, pushupViewModel)
-                    Spacer(Modifier.height(12.dp))
-
-                    if (showQuickAddShet)
-                        GetQuickAddSheet(pushupViewModel, userViewmodel) {
-                            showQuickAddShet = false
-                        }
+                    GetHomePushupCard(
+                        "Calories",
+                        estimatePushupCalories(
+                            reps = pushupData?.reps ?: 0,
+                            durationSec = pushupData?.duration ?: 0,
+                            weightKg = 70.0,
+                        ),
+                        "Estimated Calories burnt",
+                        illustrationType = PushupIllustrations.THREE
+                    )
                 }
+                Spacer(Modifier.height(24.dp))
+                GetHomeSection(userViewmodel, pushupViewModel)
+                Spacer(Modifier.height(12.dp))
+                if (showQuickAddShet)
+                    GetQuickAddSheet(pushupViewModel, userViewmodel) {
+                        showQuickAddShet = false
+                    }
             }
+        }
+        ExpandingFAB(navController) {
+            showQuickAddShet = true
         }
     }
 }

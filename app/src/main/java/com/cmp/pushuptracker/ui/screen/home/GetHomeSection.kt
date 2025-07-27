@@ -15,10 +15,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -28,6 +35,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cmp.pushuptracker.R
+import com.cmp.pushuptracker.database.entity.PushUpEntity
+import com.cmp.pushuptracker.ui.components.GetHabitCalendarView
+import com.cmp.pushuptracker.ui.components.InfoBottomSheet
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.getRandomQuote
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
@@ -35,11 +45,24 @@ import com.cmp.pushuptracker.viewmodel.UserViewmodel
 
 @Composable
 fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewModel) {
+    val pushupDataState by pushupViewModel.pushupData.collectAsState()
+    val datePushupMap by rememberUpdatedState(
+        newValue = pushupDataState.associateBy { it.date }
+    )
+
+    var selectedDate by remember { mutableStateOf<PushUpEntity?>(null) }
+    var canShowInfoBottomSheet by remember { mutableStateOf(false) }
+
+    Spacer(Modifier.height(10.dp))
+    GetHabitCalendarView(datePushupMap) {
+        selectedDate = it
+        canShowInfoBottomSheet = true
+    }
     Spacer(Modifier.height(25.dp))
-    GetPersonalBestCard(userViewmodel)
-    Spacer(Modifier.height(35.dp))
+    GetWeeklyGoalsSection(pushupDataState)
+    Spacer(Modifier.height(10.dp))
     GetChallengeCard(pushupViewModel)
-    Spacer(Modifier.height(35.dp))
+    Spacer(Modifier.height(25.dp))
     Text(
         "\"${getRandomQuote()}\"",
         fontFamily = workSansFamily,
@@ -50,6 +73,10 @@ fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewMode
         modifier = Modifier.fillMaxWidth()
     )
     Spacer(Modifier.height(15.dp))
+    if (selectedDate != null && canShowInfoBottomSheet)
+        InfoBottomSheet(selectedDate) {
+            canShowInfoBottomSheet = false
+        }
 }
 
 @Composable
@@ -115,10 +142,16 @@ fun GetChallengeCard(pushupViewModel: PushupViewModel) {
         ) {
             Image(
                 painter = painterResource(
-                    if ((todayPushup?.reps ?: 0) > 50)
+                    if ((todayPushup?.reps ?: 0) >= 50)
                         R.drawable.award
                     else
                         R.drawable.trophy_icon
+                ),
+                colorFilter = if ((todayPushup?.reps ?: 0) > 50) null else ColorFilter.tint(
+                    if ((todayPushup?.reps ?: 0) < 50)
+                        MaterialTheme.colorScheme.onBackground
+                    else
+                        MaterialTheme.colorScheme.onBackground
                 ),
                 contentDescription = "Challenge",
                 modifier = Modifier.size(25.dp)
@@ -133,7 +166,7 @@ fun GetChallengeCard(pushupViewModel: PushupViewModel) {
                 fontFamily = workSansFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(5.dp))
             Text(

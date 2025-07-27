@@ -1,10 +1,18 @@
 package com.cmp.pushuptracker.utils
 
-import kotlinx.datetime.*
-import kotlin.time.Clock
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 object TimeUtils {
@@ -62,7 +70,7 @@ object TimeUtils {
             return "This Week"
         } else if (weekOffset == -1) {
             return "Last Week"
-        } else if (weekOffset == 1){
+        } else if (weekOffset == 1) {
             return "Next Week"
         }
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -80,4 +88,47 @@ object TimeUtils {
 
         return "${format(targetStart)} - ${format(targetEnd)}"
     }
+
+    fun getDateRangeLastSundayToThisSaturday(pattern: String, noOfDaysBefore: Int): List<String> {
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+
+        val lastSundayCal = cal.clone() as Calendar
+        lastSundayCal.add(Calendar.DAY_OF_YEAR, -noOfDaysBefore)
+
+        val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+        val result = mutableListOf<String>()
+
+        val tempCal = lastSundayCal.clone() as Calendar
+        while (!tempCal.after(cal)) {
+            result.add(sdf.format(tempCal.time))
+            tempCal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return result
+    }
+
+    fun isToday(dateString: String): Boolean {
+        val today = Calendar.getInstance()
+        return today.get(Calendar.DAY_OF_MONTH) == dateString.toInt()
+    }
+
+
+    fun getCurrentMonthYear(): String {
+        val formatter =
+            java.time.format.DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())
+        val currentDate = java.time.LocalDate.now()
+        return currentDate.format(formatter)
+    }
+
+    fun formatShortDate(input: String): String {
+        return try {
+            val inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+            val date = java.time.LocalDate.parse(input, inputFormatter)
+            val outputFormatter = DateTimeFormatter.ofPattern("dd-MMMM yyyy", Locale.getDefault())
+            date.format(outputFormatter)
+        } catch (e: Exception) {
+            input // fallback to original if parse fails
+        }
+    }
+
 }
