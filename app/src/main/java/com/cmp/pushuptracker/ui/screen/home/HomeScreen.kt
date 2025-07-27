@@ -159,7 +159,7 @@ fun GetHomePushupCard(
     illustrationType: PushupIllustrations,
     canShowIllustration: Boolean = true
 ) {
-    val illustration = remember {
+    val illustration = remember(illustrationType) {
         when (illustrationType) {
             PushupIllustrations.ONE -> R.drawable.pushup_one
             PushupIllustrations.TWO -> R.drawable.pushup_two
