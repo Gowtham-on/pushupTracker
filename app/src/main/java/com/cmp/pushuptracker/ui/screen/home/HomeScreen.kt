@@ -98,8 +98,9 @@ fun HomeScreen(
                 modifier = Modifier
                     .verticalScroll(state = rememberScrollState()),
             ) {
+                val todayString = remember { TimeUtils.getTodayDate("MMMM dd") }
                 Text(
-                    "Today, ${TimeUtils.getTodayDate("MMMM dd")}",
+                    "Today, $todayString",
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
