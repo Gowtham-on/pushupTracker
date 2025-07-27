@@ -63,8 +63,9 @@ fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewMode
     Spacer(Modifier.height(10.dp))
     GetChallengeCard(pushupViewModel)
     Spacer(Modifier.height(25.dp))
+    val quote = remember { getRandomQuote() }
     Text(
-        "\"${getRandomQuote()}\"",
+        "\"$quote\"",
         fontFamily = workSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
