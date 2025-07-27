@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import com.cmp.pushuptracker.utils.getWeeklyReps
 
 @Composable
 fun GetWeeklyGoalsSection(pushups: List<PushUpEntity>) {
+    val weeklyCount = remember(pushups) { calculateWeeklyCount(pushups) }
     Text(
         "Weekly Goals",
         fontFamily = workSansFamily,
@@ -36,7 +38,7 @@ fun GetWeeklyGoalsSection(pushups: List<PushUpEntity>) {
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            calculateWeeklyCount(pushups).toString(),
+            weeklyCount.toString(),
             fontFamily = workSansFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
@@ -45,7 +47,7 @@ fun GetWeeklyGoalsSection(pushups: List<PushUpEntity>) {
         Spacer(Modifier.height(6.dp))
 
     }
-    if (calculateWeeklyCount(pushups) > 0) {
+    if (weeklyCount > 0) {
         BarGraph(
             counts = getWeeklyReps(pushups),
             barColor = MaterialTheme.colorScheme.primary,
