@@ -20,7 +20,7 @@ object ThemePreferences {
     fun getThemePreference(context: Context): String {
         val defaultTheme =  context
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(APP_THEME, "")
+            .getString(APP_THEME, Theme.SYSTEM.name)
 
        return  defaultTheme ?: Theme.SYSTEM.name
     }
