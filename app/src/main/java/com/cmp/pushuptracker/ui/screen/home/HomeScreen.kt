@@ -285,6 +285,7 @@ fun GetQuickAddSheet(
                             if (user.best < todayChanges.toInt() == true) {
                                 user.best = todayChanges.toInt()
                             }
+                            user.totalWorkoutDuration += pushupData.duration
                             userViewmodel.updateUserData(userData)
                         }
                         pushupViewModel.addPushupRecord(

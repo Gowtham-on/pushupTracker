@@ -1,4 +1,4 @@
-package com.cmp.pushuptracker.ui.screen.ProfileScreen
+package com.cmp.pushuptracker.ui.screen.profileScreen
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background

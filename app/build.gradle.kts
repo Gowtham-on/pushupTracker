@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(libs.heatmap)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.mpandroidchart)

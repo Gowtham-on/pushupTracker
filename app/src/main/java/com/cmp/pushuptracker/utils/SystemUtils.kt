@@ -1,10 +1,14 @@
 package com.cmp.pushuptracker.utils
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
+import androidx.core.net.toUri
 import com.cmp.pushuptracker.database.entity.PushUpEntity
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -79,4 +83,18 @@ fun calculateWeeklyCount(sessions: List<PushUpEntity>): Int {
         count += it
     }
     return count
+}
+
+fun openNotificationSettings(context: Context) {
+    val intent =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+    context.startActivity(intent)
+}
+fun openCameraPermissionSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    context.startActivity(intent)
 }

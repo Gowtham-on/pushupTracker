@@ -9,4 +9,5 @@ data class UserEntity(
     var totalReps: Int = 0,
     var best: Int = 0,
     var name: String = "",
+    var totalWorkoutDuration: Long = 0
 )

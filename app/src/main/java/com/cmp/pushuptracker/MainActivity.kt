@@ -51,7 +51,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
-import com.cmp.pushuptracker.ui.screen.ProfileScreen.ProfileNavigation
+import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen

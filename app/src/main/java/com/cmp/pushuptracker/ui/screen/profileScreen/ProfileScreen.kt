@@ -1,6 +1,7 @@
-package com.cmp.pushuptracker.ui.screen.ProfileScreen
+package com.cmp.pushuptracker.ui.screen.profileScreen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -20,32 +21,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.cmp.pushuptracker.R
-import com.cmp.pushuptracker.database.entity.UserEntity
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
+import com.cmp.pushuptracker.ui.screen.home.GetRedirectSection
+import com.cmp.pushuptracker.ui.screen.home.GetThemeSection
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
@@ -59,6 +58,7 @@ fun ProfileNavigation(
     homeNavigation: NavHostController,
     userViewmodel: UserViewmodel
 ) {
+
     val profileNavController = rememberNavController()
     AnimatedNavHost(
         contentAlignment = Alignment.TopCenter,
@@ -125,127 +125,29 @@ fun ProfileScreen(
         }
         Spacer(Modifier.height(10.dp))
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            GetProfileSection(userData)
-            Spacer(Modifier.height(20.dp))
-            GetStatsSection(userData)
-            Spacer(Modifier.height(20.dp))
-            GetActionsSection(profileNavController)
-        }
-
-    }
-}
-
-
-@Composable
-fun GetProfileSection(userData: UserEntity) {
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
             modifier = Modifier
-                .clip(CircleShape)
-                .size(125.dp)
-                .background(color = MaterialTheme.colorScheme.outline)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.PhotoCamera,
-                contentDescription = "Profile Pic",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(30.dp)
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-        Text(
-            if (userData.name.isBlank() == true) "User" else userData.name,
-            fontFamily = workSansFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-    }
-}
-
-@Composable
-fun GetStatsSection(userData: UserEntity) {
-    val reps = remember { userData.totalReps }
-    val best = remember { userData.best }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
-    ) {
-        GetStatsCard(reps.toString(), "Total\nReps", Modifier.weight(1f))
-//        GetStatsCard("32", "Calories\nBurnt", Modifier.weight(1f))
-        GetStatsCard(best.toString(), "Personal\nBest", Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun GetStatsCard(count: String, title: String, modifier: Modifier) {
-    Box(
-        modifier = modifier
-            .border(
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(8.dp),
-                width = 1.dp
-            )
-            .padding(15.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                count,
-                fontFamily = workSansFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-
-            Spacer(Modifier.height(10.dp))
-            Text(
-                title,
-                fontFamily = workSansFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline
-            )
-        }
-    }
-}
-
-@Composable
-fun GetActionsSection(navController: NavHostController) {
-    Column {
-        Text(
-            "Actions",
-            fontFamily = workSansFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        Spacer(Modifier.height(16.dp))
-        Row {
-            GetActionsCard("Edit Profile", R.drawable.edit_image, Modifier.weight(1f)) { }
-            Spacer(Modifier.width(15.dp))
-            GetActionsCard("Notifications", R.drawable.notification_image, Modifier.weight(1f)) { }
-        }
-        Spacer(Modifier.height(16.dp))
-        Row {
-            GetActionsCard("Themes", R.drawable.theme_image, Modifier.weight(1f)) {
-                navController.navigate(Screen.ThemeChangeView.route)
+            GetStatsSection(userData)
+            GetPermissionSection()
+            Column {
+                GetThemeSection(profileNavController)
+                GetRedirectSection("Privacy Policy") {
+                    val url = "https://talklater-d0cc6.web.app/privacy-policy.html"
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    homeNavController.context.startActivity(intent)
+                }
+                GetRedirectSection("Feature Request") {
+                    val url = ""
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    homeNavController.context.startActivity(intent)
+                }
+                Spacer(Modifier.height(20.dp))
             }
-            Spacer(Modifier.width(15.dp))
-            GetActionsCard("Features", R.drawable.q_a_image, Modifier.weight(1f)) { }
         }
+
     }
 }
 
@@ -279,7 +181,7 @@ fun GetActionsCard(title: String, icon: Int, modifier: Modifier, onClick: () -> 
             Text(
                 title,
                 fontFamily = workSansFamily,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -288,4 +190,10 @@ fun GetActionsCard(title: String, icon: Int, modifier: Modifier, onClick: () -> 
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewViews() {
+    GetPermissionSection()
 }
