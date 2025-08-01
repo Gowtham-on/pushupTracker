@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +29,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.cmp.pushuptracker.ui.components.ToggleSwitch
 import com.cmp.pushuptracker.ui.theme.workSansFamily
+import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.utils.openCameraPermissionSettings
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -45,8 +46,19 @@ fun GetPermissionSection() {
     var isCameraPermissionGranted by remember { mutableStateOf(cameraPermission.status.isGranted) }
     val context = LocalContext.current
 
-    Column (
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+
+    var shoulderPref by remember { mutableStateOf(false) }
+    var elbowPref by remember { mutableStateOf(false) }
+    var hipPref by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        shoulderPref = PreferenceUtil.getPushupPreference(PreferenceUtil.SHOULDER_DETECT, context)
+        elbowPref = PreferenceUtil.getPushupPreference(PreferenceUtil.ELBOW_DETECT, context)
+        hipPref = PreferenceUtil.getPushupPreference(PreferenceUtil.HIP_DETECT, context)
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
             "Permissions",
@@ -71,12 +83,11 @@ fun GetPermissionSection() {
         PermissionToggleRow(
             label = "Detect Shoulder",
             desc = "Mark shoulder position during workout",
-            isGranted = isCameraPermissionGranted,
+            isGranted = shoulderPref,
             onRequest = {
-                if (cameraPermission.status.shouldShowRationale)
-                    cameraPermission.launchPermissionRequest()
-                else openCameraPermissionSettings(
-                    context
+                shoulderPref = !shoulderPref
+                PreferenceUtil.savePushupPreference(
+                    PreferenceUtil.SHOULDER_DETECT, context, shoulderPref
                 )
             },
             openSettings = { openCameraPermissionSettings(context) }
@@ -84,12 +95,11 @@ fun GetPermissionSection() {
         PermissionToggleRow(
             label = "Detect Elbow",
             desc = "Mark elbow position during workout",
-            isGranted = isCameraPermissionGranted,
+            isGranted = elbowPref,
             onRequest = {
-                if (cameraPermission.status.shouldShowRationale)
-                    cameraPermission.launchPermissionRequest()
-                else openCameraPermissionSettings(
-                    context
+               elbowPref = !elbowPref
+                PreferenceUtil.savePushupPreference(
+                    PreferenceUtil.ELBOW_DETECT, context, elbowPref
                 )
             },
             openSettings = { openCameraPermissionSettings(context) }
@@ -97,12 +107,11 @@ fun GetPermissionSection() {
         PermissionToggleRow(
             label = "Detect Hip",
             desc = "Mark elbow position during workout",
-            isGranted = isCameraPermissionGranted,
+            isGranted = hipPref,
             onRequest = {
-                if (cameraPermission.status.shouldShowRationale)
-                    cameraPermission.launchPermissionRequest()
-                else openCameraPermissionSettings(
-                    context
+               hipPref = !hipPref
+                PreferenceUtil.savePushupPreference(
+                    PreferenceUtil.HIP_DETECT, context, hipPref
                 )
             },
             openSettings = { openCameraPermissionSettings(context) }
