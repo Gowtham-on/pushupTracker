@@ -38,7 +38,7 @@ class LivePreviewViewmodel @Inject constructor(
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    var currentRep = 0
+    var currentRep by mutableIntStateOf(0)
         private set
 
     var currentPhase = CurrentPhase.UP

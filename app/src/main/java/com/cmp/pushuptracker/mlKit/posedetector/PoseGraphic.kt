@@ -51,35 +51,35 @@ internal constructor(
         rightPaint.color = Color.YELLOW
     }
 
-    private var repCount = 0
     private val hysteresis = 10.0
 
-    private fun updateRepCount(shoulderY: kotlin.Float, elbowY: kotlin.Float) {
-//        val down = shoulderY > elbowY
+    private fun updateRepCount() {
+        val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
+        val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
+        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
+        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
 
-//        Log.d("repCountLog", "Inside down phase $down")
-//        if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
-//            Log.d("repCountLog", "Inside down phase - if && down $down")
-//        }
-//        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && down) {
-//            Log.d("repCountLog", "Inside down phase")
-//        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
-//            Log.d("repCountLog", repCount.toString())
-//
-//        }
+        if (leftShoulder == null || leftElbow == null || rightShoulder == null || rightElbow == null) {
+            return
+        }
+
+        // Select the arm with higher visibility so that counting works from front or side views.
+        val leftLikelihood = leftShoulder.inFrameLikelihood + leftElbow.inFrameLikelihood
+        val rightLikelihood = rightShoulder.inFrameLikelihood + rightElbow.inFrameLikelihood
+
+        val (shoulderY, elbowY) = if (leftLikelihood >= rightLikelihood) {
+            Pair(leftShoulder.position.y, leftElbow.position.y)
+        } else {
+            Pair(rightShoulder.position.y, rightElbow.position.y)
+        }
+
+        val down = shoulderY > elbowY + hysteresis
+        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && down) {
+            livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.DOWN)
+        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
+            livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.UP)
+        }
     }
-
-
-//  private fun updateRepCount(shoulderY: Double, elbowY: Double) {
-//    when {
-//      !inDownPhase && shoulderY > elbowY + hysteresis -> inDownPhase = true
-//      inDownPhase && shoulderY < elbowY - hysteresis -> {
-//        inDownPhase = false
-//        repCount++
-//        Log.d("repCountLog", repCount.toString())
-//      }
-//    }
-//  }
 
     override fun draw(canvas: Canvas) {
         val landmarks = pose.allPoseLandmarks
@@ -143,13 +143,10 @@ internal constructor(
                     "rightHipPos: ${rightHip?.position?.y.toString()}"
         )
 
-        val ls = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)!!
-        val le = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)!!
-        // (you can average left/right for robustness)
-        updateRepCount(ls.position.y, le.position.y)
+        updateRepCount()
 
         // draw your rep count somewhere
-        canvas.drawText("Reps: $repCount", 100f, 360f, classificationTextPaint)
+        canvas.drawText("Reps: ${livePreviewViewmodel.currentRep}", 100f, 360f, classificationTextPaint)
     }
 
     internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {
