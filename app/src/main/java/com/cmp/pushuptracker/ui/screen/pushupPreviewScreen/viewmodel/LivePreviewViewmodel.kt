@@ -1,6 +1,7 @@
 package com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -43,6 +44,10 @@ class LivePreviewViewmodel @Inject constructor(
 
     var currentPhase = CurrentPhase.UP
         private set
+
+    var minShoulderY by mutableFloatStateOf(Float.MAX_VALUE)
+
+    var maxShoulderY by mutableFloatStateOf(Float.MIN_VALUE)
 
     fun setLivePreviewPhase(phase:CurrentPhase) {
         if (currentPhase == CurrentPhase.DOWN && phase == CurrentPhase.UP) {

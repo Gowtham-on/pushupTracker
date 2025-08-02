@@ -3,7 +3,6 @@ package com.cmp.pushuptracker.mlKit.posedetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay.Graphic
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.CurrentPhase
@@ -13,6 +12,8 @@ import com.google.mlkit.vision.pose.PoseLandmark
 import java.lang.Float
 import kotlin.Boolean
 import kotlin.String
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.toString
 
 /** Draw the detected pose in preview. */
@@ -29,8 +30,6 @@ internal constructor(
     private var zMin = Float.MAX_VALUE
     private var zMax = Float.MIN_VALUE
     private val classificationTextPaint: Paint
-    private val leftPaint: Paint
-    private val rightPaint: Paint
     private val whitePaint: Paint
 
     init {
@@ -43,12 +42,6 @@ internal constructor(
         whitePaint.strokeWidth = STROKE_WIDTH
         whitePaint.color = Color.WHITE
         whitePaint.textSize = IN_FRAME_LIKELIHOOD_TEXT_SIZE
-        leftPaint = Paint()
-        leftPaint.strokeWidth = STROKE_WIDTH
-        leftPaint.color = Color.GREEN
-        rightPaint = Paint()
-        rightPaint.strokeWidth = STROKE_WIDTH
-        rightPaint.color = Color.YELLOW
     }
 
     private val hysteresis = 10.0
@@ -56,28 +49,32 @@ internal constructor(
     private fun updateRepCount() {
         val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
         val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
 
-        if (leftShoulder == null || leftElbow == null || rightShoulder == null || rightElbow == null) {
+        if (leftShoulder == null || rightShoulder == null) {
             return
         }
 
-        // Select the arm with higher visibility so that counting works from front or side views.
-        val leftLikelihood = leftShoulder.inFrameLikelihood + leftElbow.inFrameLikelihood
-        val rightLikelihood = rightShoulder.inFrameLikelihood + rightElbow.inFrameLikelihood
+        val avgY = (leftShoulder.position.y + rightShoulder.position.y) / 2
 
-        val (shoulderY, elbowY) = if (leftLikelihood >= rightLikelihood) {
-            Pair(leftShoulder.position.y, leftElbow.position.y)
-        } else {
-            Pair(rightShoulder.position.y, rightElbow.position.y)
+        if (livePreviewViewmodel.minShoulderY == Float.MAX_VALUE) {
+            livePreviewViewmodel.minShoulderY = avgY
+            livePreviewViewmodel.maxShoulderY = avgY
         }
 
-        val down = shoulderY > elbowY + hysteresis
-        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && down) {
+        if (livePreviewViewmodel.currentPhase == CurrentPhase.UP) {
+            livePreviewViewmodel.minShoulderY = min(livePreviewViewmodel.minShoulderY, avgY)
+        } else {
+            livePreviewViewmodel.maxShoulderY = max(livePreviewViewmodel.maxShoulderY, avgY)
+        }
+
+        val mid = (livePreviewViewmodel.minShoulderY + livePreviewViewmodel.maxShoulderY) / 2
+
+        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && avgY > mid + hysteresis) {
             livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.DOWN)
-        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
+            livePreviewViewmodel.maxShoulderY = avgY
+        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && avgY < mid - hysteresis) {
             livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.UP)
+            livePreviewViewmodel.minShoulderY = avgY
         }
     }
 
@@ -112,36 +109,10 @@ internal constructor(
 
         val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
         val rightShoulder = pose.getPoseLandmark(PoseLandmark.RIGHT_SHOULDER)
-        val leftElbow = pose.getPoseLandmark(PoseLandmark.LEFT_ELBOW)
-        val rightElbow = pose.getPoseLandmark(PoseLandmark.RIGHT_ELBOW)
-        val leftHip = pose.getPoseLandmark(PoseLandmark.LEFT_HIP)
-        val rightHip = pose.getPoseLandmark(PoseLandmark.RIGHT_HIP)
 
-        drawLine(canvas, leftShoulder, rightShoulder, whitePaint)
-        drawLine(canvas, leftHip, rightHip, whitePaint)
-        drawLine(canvas, leftElbow, rightElbow, whitePaint)
-
-        Log.d(
-            "postLandmarkLog", "leftShoulderPos: ${leftShoulder?.position?.x.toString()} " +
-                    "leftShoulderPos: ${leftShoulder?.position?.y.toString()}"
-        )
-
-        Log.d(
-            "postLandmarkLog", "rightShoulderPos: ${rightShoulder?.position?.x.toString()} " +
-                    "rightShoulderPos: ${rightShoulder?.position?.y.toString()}"
-        )
-
-
-
-        Log.d(
-            "postLandmarkLog", "leftHipPos: ${leftHip?.position?.x.toString()} " +
-                    "leftHipPos: ${leftHip?.position?.y.toString()}"
-        )
-
-        Log.d(
-            "postLandmarkLog", "rightHipPos: ${rightHip?.position?.x.toString()} " +
-                    "rightHipPos: ${rightHip?.position?.y.toString()}"
-        )
+        if (leftShoulder != null && rightShoulder != null) {
+            drawLine(canvas, leftShoulder, rightShoulder, whitePaint)
+        }
 
         updateRepCount()
 
