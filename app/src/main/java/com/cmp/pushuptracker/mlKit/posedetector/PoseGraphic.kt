@@ -115,9 +115,6 @@ internal constructor(
         }
 
         updateRepCount()
-
-        // draw your rep count somewhere
-        canvas.drawText("Reps: ${livePreviewViewmodel.currentRep}", 100f, 360f, classificationTextPaint)
     }
 
     internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {

@@ -37,4 +37,11 @@
 
     </LinearLayout>
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/reps_count_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/control"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

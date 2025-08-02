@@ -1,19 +1,3 @@
-/*
- * Copyright 2020 Google LLC. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.cmp.pushuptracker.ui.screen.pushupPreviewScreen
 
 import android.os.Bundle
@@ -28,6 +12,7 @@ import com.cmp.pushuptracker.mlKit.prefUtils.PreferenceUtils
 import com.cmp.pushuptracker.mlKit.utils.CameraSource
 import com.cmp.pushuptracker.mlKit.utils.CameraSourcePreview
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.ui.GetRepsCountView
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.ui.LivePreviewComposeView
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.utils.PreferenceUtil
@@ -46,6 +31,7 @@ class LivePreviewActivity : AppCompatActivity() {
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
     private var composeView: ComposeView? = null
+    private var repsCountView: ComposeView? = null
     private var selectedModel = POSE_DETECTION
 
     private val viewModel: LivePreviewViewmodel by viewModels()
@@ -68,6 +54,11 @@ class LivePreviewActivity : AppCompatActivity() {
         composeView = findViewById(R.id.compose_view)
         composeView?.setContent {
             LivePreviewComposeView(viewModel)
+        }
+
+        repsCountView = findViewById(R.id.reps_count_view)
+        repsCountView?.setContent {
+            GetRepsCountView(viewModel)
         }
 
         setupValueFromPreference()
