@@ -9,7 +9,11 @@ object PreferenceUtil {
     const val ELBOW_DETECT = "elbow_detect"
     const val HIP_DETECT = "hip_detect"
 
-    fun savePushupPreference(prefName: String, context: Context, enabled: Boolean) {
+    const val TOTAL_INTERVAL = "total_interval"
+    const val TOTAL_REP = "total_rep"
+    const val TOTAL_SET = "total_set"
+
+    fun savePushupSettingsPreference(prefName: String, context: Context, enabled: Boolean) {
         context
             .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
             .edit {
@@ -17,7 +21,7 @@ object PreferenceUtil {
             }
     }
 
-    fun getPushupPreference(prefName: String, context: Context): Boolean {
+    fun getPushupSettingsPreference(prefName: String, context: Context): Boolean {
         val defaultTheme = context
             .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
             .getBoolean(prefName, false)
@@ -25,4 +29,19 @@ object PreferenceUtil {
         return defaultTheme
     }
 
+    fun savePreviewPushupPref(prefName: String, context: Context, count: Int) {
+        context
+            .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
+            .edit {
+                putInt(prefName, count)
+            }
+    }
+
+    fun getPreviewPushupPref(prefName: String, context: Context): Int {
+        val defaultTheme = context
+            .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
+            .getInt(prefName, 0)
+
+        return defaultTheme
+    }
 }

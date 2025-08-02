@@ -18,30 +18,37 @@ package com.cmp.pushuptracker.ui.screen.pushupPreviewScreen
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.CompoundButton
 import android.widget.Toast
-import android.widget.ToggleButton
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
 import com.cmp.pushuptracker.R
+import com.cmp.pushuptracker.mlKit.posedetector.PoseDetectorProcessor
 import com.cmp.pushuptracker.mlKit.prefUtils.PreferenceUtils
 import com.cmp.pushuptracker.mlKit.utils.CameraSource
 import com.cmp.pushuptracker.mlKit.utils.CameraSourcePreview
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.ui.LivePreviewComposeView
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
+import com.cmp.pushuptracker.utils.PreferenceUtil
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_INTERVAL
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_REP
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_SET
 import com.google.android.gms.common.annotation.KeepName
-import com.cmp.pushuptracker.mlKit.posedetector.PoseDetectorProcessor
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 
+@AndroidEntryPoint
 @KeepName
-class LivePreviewActivity :
-    AppCompatActivity(), OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
+class LivePreviewActivity : AppCompatActivity() {
 
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
+    private var composeView: ComposeView? = null
     private var selectedModel = POSE_DETECTION
+
+    private val viewModel: LivePreviewViewmodel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,39 +64,16 @@ class LivePreviewActivity :
         if (graphicOverlay == null) {
             Log.d(TAG, "graphicOverlay is null")
         }
-        val facingSwitch = findViewById<ToggleButton>(R.id.facing_switch)
-        facingSwitch.setOnCheckedChangeListener(this)
+
+        composeView = findViewById(R.id.compose_view)
+        composeView?.setContent {
+            LivePreviewComposeView(viewModel)
+        }
+
+        setupValueFromPreference()
 
         // Creating adapter for spinner
         createCameraSource(selectedModel)
-    }
-
-    @Synchronized
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-        // An item was selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos)
-        selectedModel = parent?.getItemAtPosition(pos).toString()
-        Log.d(TAG, "Selected model: $selectedModel")
-        preview?.stop()
-        createCameraSource(selectedModel)
-        startCameraSource()
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        // Do nothing.
-    }
-
-    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        Log.d(TAG, "Set facing")
-        if (cameraSource != null) {
-            if (isChecked) {
-                cameraSource?.setFacing(CameraSource.CAMERA_FACING_FRONT)
-            } else {
-                cameraSource?.setFacing(CameraSource.CAMERA_FACING_BACK)
-            }
-        }
-        preview?.stop()
-        startCameraSource()
     }
 
     private fun createCameraSource(model: String) {
@@ -115,7 +99,8 @@ class LivePreviewActivity :
                             visualizeZ,
                             rescaleZ,
                             runClassification,
-                            /* isStreamMode = */ true
+                            /* isStreamMode = */ true,
+                            viewModel
                         )
                     )
                 }
@@ -140,6 +125,7 @@ class LivePreviewActivity :
      */
     private fun startCameraSource() {
         if (cameraSource != null) {
+            cameraSource!!.setFacing(CameraSource.CAMERA_FACING_FRONT)
             try {
                 if (preview == null) {
                     Log.d(TAG, "resume: Preview is null")
@@ -174,6 +160,26 @@ class LivePreviewActivity :
         if (cameraSource != null) {
             cameraSource?.release()
         }
+    }
+
+    private fun setupValueFromPreference() {
+        val sets = PreferenceUtil.getPreviewPushupPref(
+            TOTAL_SET,
+            this
+        )
+        val reps = PreferenceUtil.getPreviewPushupPref(
+            TOTAL_REP,
+            this
+        )
+        val interval = PreferenceUtil.getPreviewPushupPref(
+            TOTAL_INTERVAL,
+            this
+        )
+        viewModel.setupPushupDataValues(
+            sets,
+            reps,
+            interval
+        )
     }
 
     companion object {

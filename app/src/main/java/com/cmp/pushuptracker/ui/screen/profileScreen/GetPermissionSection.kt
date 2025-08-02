@@ -52,9 +52,9 @@ fun GetPermissionSection() {
     var hipPref by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        shoulderPref = PreferenceUtil.getPushupPreference(PreferenceUtil.SHOULDER_DETECT, context)
-        elbowPref = PreferenceUtil.getPushupPreference(PreferenceUtil.ELBOW_DETECT, context)
-        hipPref = PreferenceUtil.getPushupPreference(PreferenceUtil.HIP_DETECT, context)
+        shoulderPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.SHOULDER_DETECT, context)
+        elbowPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.ELBOW_DETECT, context)
+        hipPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.HIP_DETECT, context)
     }
 
     Column(
@@ -86,7 +86,7 @@ fun GetPermissionSection() {
             isGranted = shoulderPref,
             onRequest = {
                 shoulderPref = !shoulderPref
-                PreferenceUtil.savePushupPreference(
+                PreferenceUtil.savePushupSettingsPreference(
                     PreferenceUtil.SHOULDER_DETECT, context, shoulderPref
                 )
             },
@@ -98,7 +98,7 @@ fun GetPermissionSection() {
             isGranted = elbowPref,
             onRequest = {
                elbowPref = !elbowPref
-                PreferenceUtil.savePushupPreference(
+                PreferenceUtil.savePushupSettingsPreference(
                     PreferenceUtil.ELBOW_DETECT, context, elbowPref
                 )
             },
@@ -110,7 +110,7 @@ fun GetPermissionSection() {
             isGranted = hipPref,
             onRequest = {
                hipPref = !hipPref
-                PreferenceUtil.savePushupPreference(
+                PreferenceUtil.savePushupSettingsPreference(
                     PreferenceUtil.HIP_DETECT, context, hipPref
                 )
             },

@@ -24,6 +24,7 @@ import android.util.Log;
 
 import androidx.annotation.WorkerThread;
 
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel;
 import com.google.common.base.Preconditions;
 import com.google.mlkit.vision.pose.Pose;
 
@@ -103,7 +104,7 @@ public class PoseClassifierProcessor {
    * 1: PoseClass : [0.0-1.0] confidence
    */
   @WorkerThread
-  public List<String> getPoseResult(Pose pose) {
+  public List<String> getPoseResult(Pose pose, LivePreviewViewmodel livePreviewViewmodel) {
     Preconditions.checkState(Looper.myLooper() != Looper.getMainLooper());
     List<String> result = new ArrayList<>();
     ClassificationResult classification = poseClassifier.classify(pose);
@@ -128,6 +129,7 @@ public class PoseClassifierProcessor {
           tg.startTone(ToneGenerator.TONE_PROP_BEEP);
           lastRepResult = String.format(
               Locale.US, "%s : %d reps", repCounter.getClassName(), repsAfter);
+          Log.d("pushuplog", lastRepResult);
           break;
         }
       }

@@ -6,6 +6,8 @@ import android.graphics.Paint
 import android.util.Log
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay
 import com.cmp.pushuptracker.mlKit.utils.GraphicOverlay.Graphic
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.CurrentPhase
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 import java.lang.Float
@@ -21,7 +23,8 @@ internal constructor(
     private val showInFrameLikelihood: Boolean,
     private val visualizeZ: Boolean,
     private val rescaleZForVisualization: Boolean,
-    private val poseClassification: List<String>
+    private val poseClassification: List<String>,
+    private val livePreviewViewmodel: LivePreviewViewmodel
 ) : Graphic(overlay) {
     private var zMin = Float.MAX_VALUE
     private var zMax = Float.MIN_VALUE
@@ -48,25 +51,22 @@ internal constructor(
         rightPaint.color = Color.YELLOW
     }
 
-    private var inDownPhase = false
     private var repCount = 0
     private val hysteresis = 10.0
 
     private fun updateRepCount(shoulderY: kotlin.Float, elbowY: kotlin.Float) {
-        val down = shoulderY > elbowY
+//        val down = shoulderY > elbowY
 
-        if (inDownPhase && shoulderY < elbowY - hysteresis) {
-            Log.d("repCountLog", "Inside down phase - if && down $down")
-        }
-        if (!inDownPhase && down) {
-            Log.d("repCountLog", "Inside down phase")
-            inDownPhase = true
-        } else if (inDownPhase && shoulderY < elbowY - hysteresis) {
-            inDownPhase = false
-            repCount++
-            Log.d("repCountLog", repCount.toString())
-
-        }
+//        Log.d("repCountLog", "Inside down phase $down")
+//        if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
+//            Log.d("repCountLog", "Inside down phase - if && down $down")
+//        }
+//        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && down) {
+//            Log.d("repCountLog", "Inside down phase")
+//        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && shoulderY < elbowY - hysteresis) {
+//            Log.d("repCountLog", repCount.toString())
+//
+//        }
     }
 
 

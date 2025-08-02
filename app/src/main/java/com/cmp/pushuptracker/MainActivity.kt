@@ -51,10 +51,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
-import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
+import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
 fun PushUpAppNavigation(
     utilViewmodel: UtilViewmodel,
     userViewmodel: UserViewmodel,
-    hiltViewModel: PushupViewModel = hiltViewModel<PushupViewModel>()
+    pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>()
 ) {
     val navController = rememberNavController()
     Scaffold(
@@ -105,18 +105,18 @@ fun PushUpAppNavigation(
             navController = navController,
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { fadeIn(tween(1000)) },
-            exitTransition = { fadeOut(tween(800)) }
+            enterTransition = { fadeIn(tween(500)) },
+            exitTransition = { fadeOut(tween(0)) }
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
                     navController,
-                    hiltViewModel,
+                    pushupViewModel,
                     userViewmodel = userViewmodel
                 )
             }
             composable(Screen.History.route) {
-                HistoryScreen(navController, hiltViewModel)
+                HistoryScreen(navController, pushupViewModel)
             }
             composable(Screen.Profile.route) {
                 ProfileNavigation(
@@ -125,7 +125,12 @@ fun PushUpAppNavigation(
                     userViewmodel
                 )
             }
-            composable(Screen.StartWorkout.route) { StartWorkoutScreen(navController) }
+            composable(Screen.StartWorkout.route) {
+                StartWorkoutScreen(
+                    navController,
+                    pushupViewModel
+                )
+            }
         }
     }
 }

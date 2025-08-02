@@ -45,11 +45,16 @@ import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.components.RestIntervalSlider
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.LivePreviewActivity
 import com.cmp.pushuptracker.ui.theme.workSansFamily
+import com.cmp.pushuptracker.utils.PreferenceUtil
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_INTERVAL
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_REP
+import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_SET
 import com.cmp.pushuptracker.utils.TimeUtils
+import com.cmp.pushuptracker.viewmodel.PushupViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun StartWorkoutScreen(navController: NavHostController) {
+fun StartWorkoutScreen(navController: NavHostController, pushupViewModel: PushupViewModel) {
     var context = LocalContext.current
     var interval by remember { mutableIntStateOf(0) }
     var sets by remember { mutableIntStateOf(0) }
@@ -89,6 +94,21 @@ fun StartWorkoutScreen(navController: NavHostController) {
                 GetPrimaryButton(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    PreferenceUtil.savePreviewPushupPref(
+                        TOTAL_REP,
+                        context,
+                        reps
+                    )
+                    PreferenceUtil.savePreviewPushupPref(
+                        TOTAL_SET,
+                        context,
+                        sets
+                    )
+                    PreferenceUtil.savePreviewPushupPref(
+                        TOTAL_INTERVAL,
+                        context,
+                        interval
+                    )
                     val intent = Intent(context, LivePreviewActivity::class.java)
                     context.startActivity(intent)
                 }
