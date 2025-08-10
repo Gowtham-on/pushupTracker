@@ -30,18 +30,18 @@ fun HistoryScreen(
     var selectedDate by remember { mutableStateOf<PushUpEntity?>(null) }
     var canShowInfoBottomSheet by remember { mutableStateOf(false) }
 
-    if (pushupDataState.isNotEmpty()) {
-        val datePushupMap by rememberUpdatedState(
-            newValue = pushupDataState.associateBy { it.date }
-        )
+    val datePushupMap by rememberUpdatedState(
+        newValue = pushupDataState.associateBy { it.date }
+    )
 
+    Column {
+        AppBar("Statistics") {
+            navController.popBackStack()
+        }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
         ) {
-            AppBar("Statistics") {
-                navController.popBackStack()
-            }
             Spacer(Modifier.height(16.dp))
             GetHeatMap(datePushupMap) {
                 selectedDate = it

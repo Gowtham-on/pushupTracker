@@ -22,19 +22,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +75,17 @@ fun HomeScreen(
 ) {
     val pushupData = pushupViewModel.todayData
     var showQuickAddShet by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    var isScrollingUp by remember { mutableStateOf(false) }
+
+    LaunchedEffect(scrollState) {
+        var previousValue = scrollState.value
+        snapshotFlow { scrollState.value }
+            .collect { currentValue ->
+                isScrollingUp = currentValue < previousValue
+                previousValue = currentValue
+            }
+    }
 
     Box {
         Column(
@@ -96,7 +106,7 @@ fun HomeScreen(
             Spacer(Modifier.height(24.dp))
             Column(
                 modifier = Modifier
-                    .verticalScroll(state = rememberScrollState()),
+                    .verticalScroll(state = scrollState),
             ) {
                 val todayString = remember { TimeUtils.getTodayDate("MMMM dd") }
                 Text(
@@ -143,9 +153,10 @@ fun HomeScreen(
                     }
             }
         }
-        ExpandingFAB(navController) {
-            showQuickAddShet = true
-        }
+        if (isScrollingUp)
+            ExpandingFAB(navController) {
+                showQuickAddShet = true
+            }
     }
 }
 
@@ -234,7 +245,7 @@ fun GetQuickAddSheet(
         onDismissRequest = {
             onDismiss()
         },
-        sheetState = rememberModalBottomSheetState( skipPartiallyExpanded= true),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(

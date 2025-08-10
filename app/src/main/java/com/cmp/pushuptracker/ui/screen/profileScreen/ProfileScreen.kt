@@ -93,7 +93,8 @@ fun ProfileNavigation(
             ProfileScreen(
                 homeNavigation,
                 profileNavController,
-                userViewmodel
+                userViewmodel,
+                utilViewmodel
             )
         }
         composable(Screen.ThemeChangeView.route) {
@@ -111,6 +112,7 @@ fun ProfileScreen(
     homeNavController: NavHostController,
     profileNavController: NavHostController,
     userViewmodel: UserViewmodel,
+    utilViewmodel: UtilViewmodel,
 ) {
     val userData = userViewmodel.userData
 
@@ -133,7 +135,7 @@ fun ProfileScreen(
             GetStatsSection(userData)
             GetPermissionSection()
             Column {
-                GetThemeSection(profileNavController)
+                GetThemeSection(profileNavController, utilViewmodel)
                 GetRedirectSection("Privacy Policy") {
                     val url = "https://talklater-d0cc6.web.app/privacy-policy.html"
                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())

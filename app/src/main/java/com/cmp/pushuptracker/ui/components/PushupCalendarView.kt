@@ -25,8 +25,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,8 +46,22 @@ import com.cmp.pushuptracker.utils.vibrate
 @Composable
 fun GetHabitCalendarView(
     pushupMap: Map<String, PushUpEntity>,
+    list: List<PushUpEntity>,
     onClick: (PushUpEntity?) -> Unit
 ) {
+    var streak by remember {
+        mutableIntStateOf(0)
+    }
+    LaunchedEffect(list) {
+        var count = 0
+        for (pushUp in list) {
+            if (pushUp.reps > 1) {
+                count++
+            }
+        }
+        streak = count
+    }
+
     val days = remember {
         TimeUtils.getDateRangeLastSundayToThisSaturday("dd/MM/YYYY", 13)
     }
@@ -78,13 +95,29 @@ fun GetHabitCalendarView(
             .fillMaxWidth()
     ) {
         Column {
-            Text(
-                TimeUtils.getCurrentMonthYear(),
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
+            Box {
+                Text(
+                    TimeUtils.getCurrentMonthYear(),
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontFamily = workSansFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                )
+
+                Text(
+                    "Streak: $streak",
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterEnd)
+                        .padding(end = 20.dp),
+                    textAlign = TextAlign.Center,
+                    fontFamily = workSansFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                )
+            }
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
@@ -101,7 +134,7 @@ fun GetHabitCalendarView(
                         GetCircularBg(it, pushupMap, onClick)
                         Spacer(Modifier.height(12.dp))
                         GetCircularBg(
-                            "${it.take(2).toInt() + 7}" + it.drop(2),
+                            days[index + 7].toString(),
                             pushupMap,
                             onClick
                         )
@@ -167,7 +200,10 @@ fun GetCircularBg(
                 interactionSource = remember { MutableInteractionSource() }
             )
             .then(
-                if (TimeUtils.isToday(date.take(2))) {
+                if (TimeUtils.isToday(
+                        if (date.length == 1) date.take(1) else date.take(2)
+                    )
+                ) {
                     Modifier
                         .border(
                             width = 3.dp,

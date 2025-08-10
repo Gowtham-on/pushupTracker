@@ -54,7 +54,7 @@ fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewMode
     var canShowInfoBottomSheet by remember { mutableStateOf(false) }
 
     Spacer(Modifier.height(10.dp))
-    GetHabitCalendarView(datePushupMap) {
+    GetHabitCalendarView(datePushupMap, pushupDataState) {
         selectedDate = it
         canShowInfoBottomSheet = true
     }
