@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.cmp.pushuptracker.database.entity.UserEntity
 import com.cmp.pushuptracker.database.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,9 +29,8 @@ class UserViewmodel @Inject constructor(
     fun updateUserData(user: UserEntity) {
         viewModelScope.launch {
             repository.updateSession(user)
-            repository.getUserDataFromDb().collect {
-                userData = it.firstOrNull() ?: UserEntity()
-            }
+            val updated = repository.getUserDataFromDb().firstOrNull()?.firstOrNull()
+            userData = updated ?: UserEntity()
         }
     }
 
