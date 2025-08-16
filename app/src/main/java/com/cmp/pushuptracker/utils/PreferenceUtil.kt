@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 
 object PreferenceUtil {
+    const val ONBOARDING_PREF = "onboarding_pref"
     const val PUSHUP_PREF = "pushup_pref"
     const val SHOULDER_DETECT = "shoulder_detect"
     const val ELBOW_DETECT = "elbow_detect"
@@ -43,5 +44,17 @@ object PreferenceUtil {
             .getInt(prefName, 0)
 
         return defaultTheme
+    }
+
+    fun isOnboardingCompleted(context: Context): Boolean {
+        return context.getSharedPreferences(ONBOARDING_PREF, Context.MODE_PRIVATE)
+            .getBoolean("onboarding_completed", false)
+    }
+
+    fun completeOnboarding(context: Context) {
+        context.getSharedPreferences(ONBOARDING_PREF, Context.MODE_PRIVATE)
+            .edit {
+                putBoolean("onboarding_completed", true)
+            }
     }
 }

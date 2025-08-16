@@ -60,7 +60,7 @@ fun getWeeklyReps(
 ): List<Int> {
     // 1) find Monday of this week
     val weekStart = referenceDate
-        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
 
     // 2) formatter matching your stored date format
     val fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")

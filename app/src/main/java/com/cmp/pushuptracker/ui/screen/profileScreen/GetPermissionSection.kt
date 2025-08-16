@@ -152,7 +152,7 @@ private fun PermissionToggleRow(
             Text(
                 label,
                 fontFamily = workSansFamily,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onBackground,
             )

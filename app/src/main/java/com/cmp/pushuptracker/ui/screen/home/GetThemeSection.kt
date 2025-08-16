@@ -46,7 +46,7 @@ fun GetThemeSection(
         Text(
             "Theme",
             fontFamily = workSansFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -80,7 +80,7 @@ fun GetRedirectSection(
         Text(
             title,
             fontFamily = workSansFamily,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onBackground,
         )

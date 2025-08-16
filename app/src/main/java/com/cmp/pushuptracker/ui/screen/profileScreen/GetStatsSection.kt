@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,12 +30,15 @@ import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.database.entity.UserEntity
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.TimeUtils.getMinsSecFromSeconds
+import com.cmp.pushuptracker.utils.estimatePushupCalories
 
 @Composable
 fun GetStatsSection(userData: UserEntity) {
-    val reps = remember { userData.totalReps }
-    val best = remember { userData.best }
-    val totalDuration = remember { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
+    val reps = rememberSaveable { userData.totalReps }
+    val best = rememberSaveable { userData.best }
+    val totalDuration = rememberSaveable { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
+    val totalCaloriesBurnt =
+        rememberSaveable { estimatePushupCalories(reps, totalDuration.toIntOrNull() ?: 0, userData.weight) }
 
     Column {
         Text(
@@ -64,16 +68,10 @@ fun GetStatsSection(userData: UserEntity) {
                 R.drawable.duration_ill
             )
             GetIllustrationStatsCard(
-                totalDuration,
+                totalCaloriesBurnt,
                 "Total Calories Burnt",
                 Modifier.weight(1f),
                 R.drawable.calories_ill
-            )
-            GetIllustrationStatsCard(
-                reps.toString(),
-                "Total Reps",
-                Modifier.weight(1f),
-                R.drawable.pushup_done_illustration
             )
             GetIllustrationStatsCard(
                 best.toString(),

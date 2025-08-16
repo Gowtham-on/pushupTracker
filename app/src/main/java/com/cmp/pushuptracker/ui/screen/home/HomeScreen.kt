@@ -1,6 +1,7 @@
 package com.cmp.pushuptracker.ui.screen.home
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,19 +23,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +50,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
+import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.ui.components.ExpandingFAB
+import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.TimeUtils
@@ -75,7 +78,21 @@ fun HomeScreen(
     userViewmodel: UserViewmodel
 ) {
     val pushupData = pushupViewModel.todayData
-    var showQuickAddShet by remember { mutableStateOf(false) }
+    var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    var isScrollingUp by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        Log.d("flowTag", "Inside HomeScreen")
+    }
+    LaunchedEffect(scrollState) {
+        var previousValue = scrollState.value
+        snapshotFlow { scrollState.value }
+            .collect { currentValue ->
+                isScrollingUp = currentValue < previousValue + 10
+                previousValue = currentValue
+            }
+    }
 
     Box {
         Column(
@@ -96,7 +113,7 @@ fun HomeScreen(
             Spacer(Modifier.height(24.dp))
             Column(
                 modifier = Modifier
-                    .verticalScroll(state = rememberScrollState()),
+                    .verticalScroll(state = scrollState),
             ) {
                 val todayString = remember { TimeUtils.getTodayDate("MMMM dd") }
                 Text(
@@ -143,9 +160,10 @@ fun HomeScreen(
                     }
             }
         }
-        ExpandingFAB(navController) {
-            showQuickAddShet = true
-        }
+        if (isScrollingUp)
+            ExpandingFAB(navController) {
+                showQuickAddShet = true
+            }
     }
 }
 
@@ -222,19 +240,15 @@ fun GetQuickAddSheet(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
-    var reps by remember { mutableStateOf("") }
-    var sets by remember { mutableStateOf("") }
-    var min by remember { mutableStateOf("0") }
-    var secs by remember { mutableStateOf("0") }
-
-    val pushupData = pushupViewModel.selectedDayData
+    val addPushupData by remember { mutableStateOf(PushupQuickAdd()) }
+    val selectedDayData = pushupViewModel.selectedDayData
     val userData = userViewmodel.userData
 
     ModalBottomSheet(
         onDismissRequest = {
             onDismiss()
         },
-        sheetState = rememberModalBottomSheetState( skipPartiallyExpanded= true),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(
@@ -247,9 +261,9 @@ fun GetQuickAddSheet(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.padding(vertical = 10.dp))
-            GetSheetTextField(title = "Reps", onTextChange = { reps = it })
+            GetSheetTextField(title = "Total Reps", onTextChange = { addPushupData.reps = it })
             Spacer(Modifier.padding(vertical = 10.dp))
-            GetSheetTextField(title = "Sets", onTextChange = { sets = it })
+            GetSheetTextField(title = "Total Sets", onTextChange = { addPushupData.sets = it })
             Spacer(Modifier.padding(vertical = 10.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -257,13 +271,13 @@ fun GetQuickAddSheet(
                 GetSheetTextField(
                     modifier = Modifier.weight(1f),
                     "Min",
-                    onTextChange = { min = it },
+                    onTextChange = { addPushupData.min = it },
                     R.drawable.timer_two
                 )
                 GetSheetTextField(
                     modifier = Modifier.weight(1f),
                     "Seconds",
-                    onTextChange = { secs = it },
+                    onTextChange = { addPushupData.secs = it },
                     R.drawable.timer_two
                 )
             }
@@ -274,24 +288,29 @@ fun GetQuickAddSheet(
             Spacer(Modifier.padding(vertical = 10.dp))
             Button(
                 onClick = {
-                    if (reps.isNotBlank()
-                        && sets.isNotBlank()
+                    if (addPushupData.reps.isNotBlank()
+                        && addPushupData.sets.isNotBlank()
                         && selectedDate.isNotBlank()
                     ) {
-                        if (pushupData != null) {
-                            var todayChanges = abs(pushupData.reps - reps.toInt())
-                            val user = userData
-                            user.totalReps += todayChanges.toInt()
-                            if (user.best < todayChanges.toInt() == true) {
-                                user.best = todayChanges.toInt()
-                            }
-                            user.totalWorkoutDuration += pushupData.duration
-                            userViewmodel.updateUserData(userData)
+                        var tempData = selectedDayData ?: PushUpEntity(
+                            selectedDate,
+                            0,
+                            0,
+                            0
+                        )
+
+                        var todayChanges = abs(tempData.reps - addPushupData.reps.toInt())
+                        val user = userData
+                        user.totalReps += todayChanges.toInt()
+                        if (user.best < todayChanges.toInt() == true) {
+                            user.best = todayChanges.toInt()
                         }
+                        user.totalWorkoutDuration += tempData.duration + (addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()
+                        userViewmodel.updateUserData(userData)
                         pushupViewModel.addPushupRecord(
-                            reps = reps.toInt(),
-                            sets = sets.toInt(),
-                            duration = (min.toInt() * 60) + secs.toInt(),
+                            reps = addPushupData.reps.toInt(),
+                            sets = addPushupData.sets.toInt(),
+                            duration = ((addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()) + tempData.duration,
                             date = selectedDate
                         )
                         onDismiss()

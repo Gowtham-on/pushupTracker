@@ -34,9 +34,7 @@ class UserViewmodel @Inject constructor(
         }
     }
 
-    fun addUser(name: String, best: Int, reps: Int) {
-        viewModelScope.launch {
-            repository.addUser(reps, name, best)
-        }
+    suspend fun addUser(name: String, best: Int, reps: Int, weight: Double) {
+        repository.addUser(reps, name, best, weight)
     }
 }

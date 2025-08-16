@@ -24,7 +24,7 @@ class PushupViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
+            initialValue = listOf(PushUpEntity("", 0, 0, 0))
         )
 
     var todayData by mutableStateOf<PushUpEntity?>(null)

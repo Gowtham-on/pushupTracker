@@ -2,6 +2,7 @@ package com.cmp.pushuptracker.ui.screen.profileScreen
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -27,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -93,7 +95,8 @@ fun ProfileNavigation(
             ProfileScreen(
                 homeNavigation,
                 profileNavController,
-                userViewmodel
+                userViewmodel,
+                utilViewmodel
             )
         }
         composable(Screen.ThemeChangeView.route) {
@@ -111,9 +114,12 @@ fun ProfileScreen(
     homeNavController: NavHostController,
     profileNavController: NavHostController,
     userViewmodel: UserViewmodel,
+    utilViewmodel: UtilViewmodel,
 ) {
     val userData = userViewmodel.userData
-
+    LaunchedEffect(Unit) {
+        Log.d("flowTag", "Inside Profile")
+    }
     Column(
         modifier = Modifier
             .background(
@@ -133,7 +139,7 @@ fun ProfileScreen(
             GetStatsSection(userData)
             GetPermissionSection()
             Column {
-                GetThemeSection(profileNavController)
+                GetThemeSection(profileNavController, utilViewmodel)
                 GetRedirectSection("Privacy Policy") {
                     val url = "https://talklater-d0cc6.web.app/privacy-policy.html"
                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())

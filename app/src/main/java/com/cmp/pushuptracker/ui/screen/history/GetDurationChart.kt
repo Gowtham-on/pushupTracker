@@ -37,8 +37,9 @@ fun GetDurationChart(datePushupMap: Map<String, PushUpEntity>) {
     val listOfXAxis = remember(weekIndex) { weekDates.map { it.substring(0, 5) } }
     val timeEntry = remember(weekIndex, datePushupMap) {
         weekDates.mapIndexed { index, date ->
-            val duration = datePushupMap[date]?.duration ?: 0
-            Entry(index.toFloat(), duration.toFloat())
+            val duration = datePushupMap[date]?.duration?.toFloat() ?: 0f
+            val durationInMinutes = duration.toFloat() / 60f
+            Entry(index.toFloat(), durationInMinutes)
         }
     }
     val weekTitle = remember(weekIndex) { TimeUtils.getWeekDateRangeString(weekIndex) }
@@ -98,7 +99,12 @@ fun GetDurationChart(datePushupMap: Map<String, PushUpEntity>) {
                 )
             )
         }
-        LineChartCompose(timeEntry, canShowLegend = false, xAxisValues = listOfXAxis)
+        LineChartCompose(
+            timeEntry,
+            canShowLegend = false,
+            xAxisValues = listOfXAxis,
+            allowFloat = true
+        )
     }
 
 }
