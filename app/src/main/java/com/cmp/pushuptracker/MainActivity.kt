@@ -11,7 +11,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,8 +33,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,19 +49,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cmp.pushuptracker.ui.components.HomeScreenShimmer
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
+import com.cmp.pushuptracker.ui.screen.onBoarding.OnBoardingNavigation
 import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
+import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -72,6 +77,12 @@ class MainActivity : ComponentActivity() {
             val utilViewmodel = hiltViewModel<UtilViewmodel>()
             val userViewmodel = hiltViewModel<UserViewmodel>()
             val theme = utilViewmodel.theme
+
+            var isOnboardingCompleted by remember { mutableStateOf<Boolean?>(null) }
+
+            LaunchedEffect(Unit) {
+                isOnboardingCompleted = PreferenceUtil.isOnboardingCompleted(this@MainActivity)
+            }
             PushupTrackerTheme(
                 userSelectedTheme = theme
             ) {
@@ -81,7 +92,15 @@ class MainActivity : ComponentActivity() {
                             bottom = innerPadding.calculateBottomPadding(),
                         )
                     ) {
-                        PushUpAppNavigation(utilViewmodel, userViewmodel)
+                        if (isOnboardingCompleted == null) {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                HomeScreenShimmer()
+                            }
+                        } else if (isOnboardingCompleted == true) {
+                            PushUpAppNavigation(utilViewmodel, userViewmodel)
+                        } else if (isOnboardingCompleted != true) {
+                            OnBoardingNavigation(utilViewmodel, userViewmodel)
+                        }
                     }
                 }
             }
@@ -100,13 +119,11 @@ fun PushUpAppNavigation(
     Scaffold(
         bottomBar = { CustomBottomNavBar(navController) }
     ) { innerPadding ->
-        AnimatedNavHost(
-            contentAlignment = Alignment.TopCenter,
+        NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { fadeIn(tween(500)) },
-            exitTransition = { fadeOut(tween(0)) }
+            enterTransition = { fadeIn(tween(500)) }
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(

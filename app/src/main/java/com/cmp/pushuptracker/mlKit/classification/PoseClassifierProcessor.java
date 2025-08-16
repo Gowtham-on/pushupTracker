@@ -129,7 +129,6 @@ public class PoseClassifierProcessor {
           tg.startTone(ToneGenerator.TONE_PROP_BEEP);
           lastRepResult = String.format(
               Locale.US, "%s : %d reps", repCounter.getClassName(), repsAfter);
-          Log.d("pushuplog", lastRepResult);
           break;
         }
       }

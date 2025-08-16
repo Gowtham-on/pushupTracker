@@ -2,7 +2,6 @@ package com.cmp.pushuptracker.ui.components
 
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,13 +23,15 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
+import java.util.Locale
 
 @Composable
 fun LineChartCompose(
     entry: List<Entry>,
     canShowLegend: Boolean,
     xAxisValues: List<String>,
-    label: String = "Progress"
+    label: String = "Progress",
+    allowFloat: Boolean = false
 ) {
     val lineColor = MaterialTheme.colorScheme.primary.toArgb()
     val lineColorAlpha = MaterialTheme.colorScheme.primary.copy(0.1f).toArgb()
@@ -95,7 +96,7 @@ fun LineChartCompose(
                 setDrawFilled(true)
                 fillColor = lineColorAlpha
                 fillAlpha = 40
-                valueFormatter = ZeroHidingValueFormatter()
+                valueFormatter = ZeroHidingValueFormatter(allowFloat)
             }
 
             chart.extraBottomOffset = 10f
@@ -132,8 +133,15 @@ class XAxisValueFormatter(val xAxisValues: List<String>) : ValueFormatter() {
     }
 }
 
-class ZeroHidingValueFormatter : ValueFormatter() {
+class ZeroHidingValueFormatter(val allowFloat: Boolean = false) : ValueFormatter() {
     override fun getFormattedValue(value: Float): String {
-        return if (value == 0f) "" else value.toInt().toString()
+        val formatedValue = if (allowFloat) {
+            val num = value.toFloat()
+            String.format(Locale.US, "%.1f", num)   // exactly 2 decimals
+        } else {
+            val intVal = value.toFloat().toInt()
+            intVal.toString()
+        }
+        return if (value == 0f) "" else formatedValue
     }
 }

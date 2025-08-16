@@ -14,7 +14,6 @@ import kotlin.Boolean
 import kotlin.String
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.toString
 
 /** Draw the detected pose in preview. */
 class PoseGraphic
@@ -44,7 +43,7 @@ internal constructor(
         whitePaint.textSize = IN_FRAME_LIKELIHOOD_TEXT_SIZE
     }
 
-    private val hysteresis = 10.0
+    private val depthThreshold = 40f
 
     private fun updateRepCount() {
         val leftShoulder = pose.getPoseLandmark(PoseLandmark.LEFT_SHOULDER)
@@ -60,21 +59,18 @@ internal constructor(
             livePreviewViewmodel.minShoulderY = avgY
             livePreviewViewmodel.maxShoulderY = avgY
         }
-
         if (livePreviewViewmodel.currentPhase == CurrentPhase.UP) {
             livePreviewViewmodel.minShoulderY = min(livePreviewViewmodel.minShoulderY, avgY)
+            if (avgY - livePreviewViewmodel.minShoulderY > depthThreshold) {
+                livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.DOWN)
+                livePreviewViewmodel.maxShoulderY = avgY
+            }
         } else {
             livePreviewViewmodel.maxShoulderY = max(livePreviewViewmodel.maxShoulderY, avgY)
-        }
-
-        val mid = (livePreviewViewmodel.minShoulderY + livePreviewViewmodel.maxShoulderY) / 2
-
-        if (livePreviewViewmodel.currentPhase != CurrentPhase.DOWN && avgY > mid + hysteresis) {
-            livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.DOWN)
-            livePreviewViewmodel.maxShoulderY = avgY
-        } else if (livePreviewViewmodel.currentPhase == CurrentPhase.DOWN && avgY < mid - hysteresis) {
-            livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.UP)
-            livePreviewViewmodel.minShoulderY = avgY
+            if (livePreviewViewmodel.maxShoulderY - avgY > depthThreshold) {
+                livePreviewViewmodel.setLivePreviewPhase(CurrentPhase.UP)
+                livePreviewViewmodel.minShoulderY = avgY
+            }
         }
     }
 

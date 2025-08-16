@@ -17,8 +17,8 @@ class UserRepository @Inject constructor(
         return dao.getUserData()
     }
 
-    suspend fun addUser(reps: Int, name: String, best: Int) {
-        dao.insertUser(UserEntity(totalReps = reps, best = best, name = name))
+    suspend fun addUser(reps: Int, name: String, best: Int, weight: Double) {
+        dao.insertUser(UserEntity(totalReps = reps, best = best, name = name, weight = weight))
     }
 
     suspend fun delete(user: UserEntity) {
