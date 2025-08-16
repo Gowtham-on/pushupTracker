@@ -15,12 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,10 +44,10 @@ import com.cmp.pushuptracker.viewmodel.UserViewmodel
 
 @Composable
 fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewModel) {
-    val pushupDataState by pushupViewModel.pushupData.collectAsState()
-    val datePushupMap by rememberUpdatedState(
-        newValue = pushupDataState.associateBy { it.date }
-    )
+    val pushupDataState by pushupViewModel.pushupData.collectAsStateWithLifecycle()
+    val datePushupMap = remember(pushupDataState) {
+        pushupDataState.associateBy { it.date }
+    }
 
     var selectedDate by remember { mutableStateOf<PushUpEntity?>(null) }
     var canShowInfoBottomSheet by remember { mutableStateOf(false) }
