@@ -1,10 +1,10 @@
 package com.cmp.pushuptracker.ui.screen.history
 
 import android.util.Log
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +35,7 @@ fun HistoryScreen(
     val datePushupMap = remember(pushupDataState) {
         pushupDataState.associateBy { it.date }
     }
+    val scrollState = rememberSaveable(saver = ScrollState.Saver) { ScrollState(0) }
 
     LaunchedEffect(Unit) {
         Log.d("flowTag", "Inside History")
@@ -45,8 +46,7 @@ fun HistoryScreen(
             navController.popBackStack()
         }
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.verticalScroll(scrollState)
         ) {
             Spacer(Modifier.height(16.dp))
             GetHeatMap(datePushupMap) {
