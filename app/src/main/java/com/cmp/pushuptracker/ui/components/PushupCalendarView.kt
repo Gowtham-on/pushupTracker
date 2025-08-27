@@ -42,6 +42,8 @@ import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.vibrate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun GetHabitCalendarView(
@@ -53,13 +55,31 @@ fun GetHabitCalendarView(
         mutableIntStateOf(0)
     }
     LaunchedEffect(list) {
-        var count = 0
-        for (pushUp in list) {
-            if (pushUp.reps > 1) {
-                count++
+        var currentStreak = 0
+        var missedDays = 0
+
+        val today = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+        // Create a set of dates that user worked out
+        val completedDates = list
+            .filter { it.reps > 0 }
+            .map { LocalDate.parse(it.date, formatter) }
+            .toSet()
+
+        var dateToCheck = today
+
+        while (missedDays < 3) {
+            if (completedDates.contains(dateToCheck)) {
+                currentStreak++
+                missedDays = 0 // reset missed streak
+            } else {
+                missedDays++
             }
+            dateToCheck = dateToCheck.minusDays(1)
         }
-        streak = count
+
+        streak = currentStreak
     }
 
     val days = remember {

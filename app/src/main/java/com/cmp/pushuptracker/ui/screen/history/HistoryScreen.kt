@@ -51,9 +51,9 @@ fun HistoryScreen(
                 canShowInfoBottomSheet = true
             }
             Spacer(Modifier.height(16.dp))
-            GetDurationChart(datePushupMap)
-            Spacer(Modifier.height(16.dp))
             GetRepsChart(datePushupMap)
+            Spacer(Modifier.height(16.dp))
+            GetDurationChart(datePushupMap)
             Spacer(Modifier.height(16.dp))
             if (selectedDate != null && canShowInfoBottomSheet)
                 InfoBottomSheet(selectedDate) {
