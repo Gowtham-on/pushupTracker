@@ -1,9 +1,8 @@
 package com.cmp.pushuptracker.camera
 
-import android.util.Log
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
@@ -14,62 +13,77 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.pose.Pose
+import com.google.mlkit.vision.pose.PoseDetection
+import com.google.mlkit.vision.pose.accurate.AccuratePoseDetectorOptions
 
 @Composable
 fun CameraPreview(
     modifier: Modifier = Modifier,
-    onFrameAnalyzed: (image: ImageProxy) -> Unit
+    onFrame: (ImageProxy) -> Unit
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalContext.current as LifecycleOwner
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
-            val previewView = PreviewView(ctx).apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+            PreviewView(ctx).apply {
+                scaleType = PreviewView.ScaleType.FILL_CENTER
             }
-
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-
+        },
+        update = { previewView ->
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
+                val preview = Preview.Builder().build().apply {
+                    setSurfaceProvider(previewView.surfaceProvider)
                 }
 
-                val imageAnalysis = ImageAnalysis.Builder()
+                val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                     .build()
 
-                imageAnalysis.setAnalyzer(
-                    ContextCompat.getMainExecutor(ctx),
-                    { image -> onFrameAnalyzed(image) }
-                )
-
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                analysis.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
+                    onFrame(imageProxy)
+                }
 
                 try {
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
                         lifecycleOwner,
-                        cameraSelector,
+                        CameraSelector.DEFAULT_FRONT_CAMERA,
                         preview,
-                        imageAnalysis
+                        analysis
                     )
                 } catch (e: Exception) {
-                    Log.e("CameraX", "Binding failed", e)
+                    e.printStackTrace()
                 }
-
-            }, ContextCompat.getMainExecutor(ctx))
-
-            previewView
+            }, ContextCompat.getMainExecutor(context))
         }
     )
 }
+
+private val poseDetector = PoseDetection.getClient(
+    AccuratePoseDetectorOptions.Builder()
+        .setDetectorMode(AccuratePoseDetectorOptions.STREAM_MODE)
+        .build()
+)
+
+@OptIn(ExperimentalGetImage::class)
+fun processImage(imageProxy: ImageProxy, onPoseDetected: (Pose) -> Unit) {
+    val mediaImage = imageProxy.image ?: return
+    val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+
+    poseDetector.process(inputImage)
+        .addOnSuccessListener { pose ->
+            onPoseDetected(pose)
+        }
+        .addOnCompleteListener {
+            imageProxy.close()
+        }
+}
+
