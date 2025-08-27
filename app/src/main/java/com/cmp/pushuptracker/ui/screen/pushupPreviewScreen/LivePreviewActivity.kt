@@ -58,7 +58,7 @@ class LivePreviewActivity : AppCompatActivity() {
 
         repsCountView = findViewById(R.id.reps_count_view)
         repsCountView?.setContent {
-            GetRepsCountView(viewModel)
+            GetRepsCountView(0)
         }
 
         setupValueFromPreference()

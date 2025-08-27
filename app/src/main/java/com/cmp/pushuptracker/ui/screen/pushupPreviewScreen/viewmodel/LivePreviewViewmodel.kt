@@ -14,15 +14,31 @@ class LivePreviewViewmodel @Inject constructor(
     private val repository: PushupRepository  // optional dependency
 ) : ViewModel() {
 
-    var currentMode by mutableIntStateOf(CurrentMode.PUSHUP.ordinal)
+    var currentMode by mutableIntStateOf(CurrentMode.INIT.ordinal)
         private set
 
     var reps by mutableIntStateOf(0)
         private set
+
     var sets by mutableIntStateOf(0)
         private set
+
     var interval by mutableIntStateOf(0)
         private set
+
+    var totalReps by mutableIntStateOf(0)
+        private set
+
+    var totalSets by mutableIntStateOf(0)
+        private set
+
+    fun incrementTotalReps() {
+        totalReps += 1
+    }
+
+    fun incrementSets() {
+        totalSets += 1
+    }
 
     fun setupPushupDataValues(
         sets: Int,
@@ -38,6 +54,13 @@ class LivePreviewViewmodel @Inject constructor(
         currentMode = mode.ordinal
     }
 
+    fun clearData() {
+        setCurrentMode(CurrentMode.INIT)
+        setupPushupDataValues(0, 0, 0)
+        totalReps = 0
+        totalSets = 0
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     var currentRep by mutableIntStateOf(0)
         private set
@@ -49,7 +72,7 @@ class LivePreviewViewmodel @Inject constructor(
 
     var maxShoulderY by mutableFloatStateOf(Float.MIN_VALUE)
 
-    fun setLivePreviewPhase(phase:CurrentPhase) {
+    fun setLivePreviewPhase(phase: CurrentPhase) {
         if (currentPhase == CurrentPhase.DOWN && phase == CurrentPhase.UP) {
             currentRep += 1
         }
@@ -59,8 +82,10 @@ class LivePreviewViewmodel @Inject constructor(
 }
 
 enum class CurrentMode {
+    INIT,
     INTERVAL,
-    PUSHUP
+    PUSHUP,
+    COMPLETED
 }
 
 enum class CurrentPhase {

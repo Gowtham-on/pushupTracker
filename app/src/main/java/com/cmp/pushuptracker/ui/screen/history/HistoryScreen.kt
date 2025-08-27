@@ -37,10 +37,6 @@ fun HistoryScreen(
         newValue = pushupDataState.associateBy { it.date }
     )
 
-    LaunchedEffect(Unit) {
-        Log.d("flowTag", "Inside History")
-    }
-
     Column {
         AppBar("Statistics") {
             navController.popBackStack()

@@ -1,7 +1,6 @@
 package com.cmp.pushuptracker.ui.screen.home
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -39,11 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.components.RestIntervalSlider
-import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.LivePreviewActivity
+import com.cmp.pushuptracker.ui.navigationUtils.Screen
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_INTERVAL
@@ -54,7 +55,11 @@ import com.cmp.pushuptracker.viewmodel.PushupViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun StartWorkoutScreen(navController: NavHostController, pushupViewModel: PushupViewModel) {
+fun StartWorkoutScreen(
+    navController: NavHostController,
+    pushupViewModel: PushupViewModel,
+    livePreviewViewmodel: LivePreviewViewmodel
+) {
     var context = LocalContext.current
     var interval by remember { mutableIntStateOf(0) }
     var sets by remember { mutableIntStateOf(0) }
@@ -94,23 +99,15 @@ fun StartWorkoutScreen(navController: NavHostController, pushupViewModel: Pushup
                 GetPrimaryButton(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    PreferenceUtil.savePreviewPushupPref(
-                        TOTAL_REP,
-                        context,
-                        reps
-                    )
-                    PreferenceUtil.savePreviewPushupPref(
-                        TOTAL_SET,
-                        context,
-                        sets
-                    )
-                    PreferenceUtil.savePreviewPushupPref(
-                        TOTAL_INTERVAL,
-                        context,
+                    livePreviewViewmodel.setupPushupDataValues(
+                        sets,
+                        reps,
                         interval
                     )
-                    val intent = Intent(context, LivePreviewActivity::class.java)
-                    context.startActivity(intent)
+
+                    navController.navigate(Screen.LivePreviewScreen.route)
+//                    val intent = Intent(context, LivePreviewActivity::class.java)
+//                    context.startActivity(intent)
                 }
             }
         }
@@ -120,6 +117,15 @@ fun StartWorkoutScreen(navController: NavHostController, pushupViewModel: Pushup
 @Composable
 fun GetFormFields(title: String, value: (value: String, type: String) -> Unit) {
     var text by remember { mutableStateOf("") }
+    val placeHolder by remember {
+        mutableStateOf(
+            if (title == "Reps") {
+                "Enter reps for each set"
+            } else {
+                "Enter total sets"
+            }
+        )
+    }
     Column {
         Text(
             title,
@@ -143,7 +149,7 @@ fun GetFormFields(title: String, value: (value: String, type: String) -> Unit) {
             maxLines = 1,
             placeholder = {
                 Text(
-                    "Enter $title",
+                    placeHolder,
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp,

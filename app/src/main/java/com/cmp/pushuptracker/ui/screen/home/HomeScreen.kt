@@ -55,6 +55,7 @@ import com.cmp.pushuptracker.ui.components.ExpandingFAB
 import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
+import com.cmp.pushuptracker.utils.PushupUtils
 import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.estimatePushupCalories
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
@@ -82,9 +83,6 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
     var isScrollingUp by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        Log.d("flowTag", "Inside HomeScreen")
-    }
     LaunchedEffect(scrollState) {
         var previousValue = scrollState.value
         snapshotFlow { scrollState.value }
@@ -292,27 +290,34 @@ fun GetQuickAddSheet(
                         && addPushupData.sets.isNotBlank()
                         && selectedDate.isNotBlank()
                     ) {
-                        var tempData = selectedDayData ?: PushUpEntity(
-                            selectedDate,
-                            0,
-                            0,
-                            0
+                        PushupUtils.addPushupInDb(
+                            selectedDayData = selectedDayData,
+                            selectedDate = selectedDate,
+                            userData = userData,
+                            addPushupData = addPushupData,
+                            userViewmodel = userViewmodel,
+                            pushupViewModel = pushupViewModel
                         )
-
-                        var todayChanges = abs(tempData.reps - addPushupData.reps.toInt())
-                        val user = userData
-                        user.totalReps += todayChanges.toInt()
-                        if (user.best < todayChanges.toInt() == true) {
-                            user.best = todayChanges.toInt()
-                        }
-                        user.totalWorkoutDuration += tempData.duration + (addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()
-                        userViewmodel.updateUserData(userData)
-                        pushupViewModel.addPushupRecord(
-                            reps = addPushupData.reps.toInt(),
-                            sets = addPushupData.sets.toInt(),
-                            duration = ((addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()) + tempData.duration,
-                            date = selectedDate
-                        )
+//                        var tempData = selectedDayData ?: PushUpEntity(
+//                            selectedDate,
+//                            0,
+//                            0,
+//                            0
+//                        )
+//
+//                        val user = userData
+//                        user.totalReps += addPushupData.reps.toInt()
+//                        if (user.best < addPushupData.reps.toInt() == true) {
+//                            user.best = addPushupData.reps.toInt()
+//                        }
+//                        user.totalWorkoutDuration += tempData.duration + (addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()
+//                        userViewmodel.updateUserData(userData)
+//                        pushupViewModel.addPushupRecord(
+//                            reps = addPushupData.reps.toInt() + tempData.reps,
+//                            sets = addPushupData.sets.toInt() + tempData.sets,
+//                            duration = ((addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()) + tempData.duration,
+//                            date = selectedDate
+//                        )
                         onDismiss()
                     }
                 },

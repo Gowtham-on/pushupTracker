@@ -117,9 +117,6 @@ fun ProfileScreen(
     utilViewmodel: UtilViewmodel,
 ) {
     val userData = userViewmodel.userData
-    LaunchedEffect(Unit) {
-        Log.d("flowTag", "Inside Profile")
-    }
     Column(
         modifier = Modifier
             .background(

@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
@@ -60,6 +61,8 @@ import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.screen.onBoarding.OnBoardingNavigation
 import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.ui.PushUpScreen
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.PushupTrackerTheme
 import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
@@ -113,11 +116,19 @@ class MainActivity : ComponentActivity() {
 fun PushUpAppNavigation(
     utilViewmodel: UtilViewmodel,
     userViewmodel: UserViewmodel,
-    pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>()
+    pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>(),
+    livePreviewViewModel: LivePreviewViewmodel = hiltViewModel<LivePreviewViewmodel>()
 ) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     Scaffold(
-        bottomBar = { CustomBottomNavBar(navController) }
+        bottomBar = {
+            if (currentRoute != Screen.LivePreviewScreen.route)
+                CustomBottomNavBar(navController)
+            else
+                Box(modifier = Modifier)
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -145,7 +156,16 @@ fun PushUpAppNavigation(
             composable(Screen.StartWorkout.route) {
                 StartWorkoutScreen(
                     navController,
-                    pushupViewModel
+                    pushupViewModel,
+                    livePreviewViewModel
+                )
+            }
+            composable(Screen.LivePreviewScreen.route) {
+                PushUpScreen(
+                    navController,
+                    pushupViewModel,
+                    livePreviewViewModel,
+                    userViewmodel
                 )
             }
         }

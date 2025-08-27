@@ -34,11 +34,11 @@ import com.cmp.pushuptracker.utils.estimatePushupCalories
 
 @Composable
 fun GetStatsSection(userData: UserEntity) {
-    val reps = rememberSaveable { userData.totalReps }
-    val best = rememberSaveable { userData.best }
-    val totalDuration = rememberSaveable { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
+    val reps = remember { userData.totalReps }
+    val best = remember { userData.best }
+    val totalDuration = remember { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
     val totalCaloriesBurnt =
-        rememberSaveable { estimatePushupCalories(reps, totalDuration.toIntOrNull() ?: 0, userData.weight) }
+        remember { estimatePushupCalories(reps, totalDuration.toIntOrNull() ?: 0, userData.weight) }
 
     Column {
         Text(

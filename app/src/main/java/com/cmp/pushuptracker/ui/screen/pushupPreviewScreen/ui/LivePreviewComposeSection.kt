@@ -7,6 +7,6 @@ import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreview
 @Composable
 fun LivePreviewComposeView(viewModel: LivePreviewViewmodel) {
     Column {
-        PushUpPreviewScreen(viewModel)
+//        PushUpCountdownSection(viewModel, )
     }
 }
