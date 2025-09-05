@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +79,7 @@ fun HomeScreen(
     pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>(),
     userViewmodel: UserViewmodel
 ) {
-    val pushupData = pushupViewModel.todayData
+    val pushupData by pushupViewModel.todayData.collectAsState()
     var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -142,7 +143,7 @@ fun HomeScreen(
                         "Calories",
                         estimatePushupCalories(
                             reps = pushupData?.reps ?: 0,
-                            durationSec = pushupData?.duration ?: 0,
+                            durationSec = pushupData?.duration?.toLong() ?: 0,
                             weightKg = 70.0,
                         ),
                         "Estimated Calories burnt",
@@ -239,7 +240,7 @@ fun GetQuickAddSheet(
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf("") }
     val addPushupData by remember { mutableStateOf(PushupQuickAdd()) }
-    val selectedDayData = pushupViewModel.selectedDayData
+    val selectedDayData by pushupViewModel.selectedDayData.collectAsState()
     val userData = userViewmodel.userData
 
     ModalBottomSheet(
@@ -339,7 +340,7 @@ fun GetQuickAddSheet(
             QuickAddCalendar(
                 onSubmit = {
                     selectedDate = TimeUtils.formatTimestamp(it, "dd/MM/yyyy")
-                    pushupViewModel.getRecordByDate(selectedDate)
+                    pushupViewModel.setSelectedDate(selectedDate)
                 }
             ) {
                 showDatePicker = false

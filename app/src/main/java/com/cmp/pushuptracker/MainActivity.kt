@@ -174,11 +174,13 @@ fun PushUpAppNavigation(
 
 @Composable
 fun CustomBottomNavBar(navController: NavHostController) {
-    val items = listOf(
+    val items = remember {
+        listOf(
         Screen.Home,
         Screen.History,
         Screen.Profile
-    )
+        )
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val selectedIndex = items.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)

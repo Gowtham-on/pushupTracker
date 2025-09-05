@@ -21,7 +21,7 @@ import com.cmp.pushuptracker.utils.getWeeklyReps
 fun GetWeeklyGoalsSection(pushups: List<PushUpEntity>) {
     val weeklyCount = remember(pushups) { calculateWeeklyCount(pushups) }
     Text(
-        "Weekly Goals",
+        "Weekly Stats",
         fontFamily = workSansFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,

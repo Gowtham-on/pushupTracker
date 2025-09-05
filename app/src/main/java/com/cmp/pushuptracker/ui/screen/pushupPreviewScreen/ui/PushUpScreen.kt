@@ -19,13 +19,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,11 +64,33 @@ fun PushUpScreen(
 ) {
     var reps by remember { mutableIntStateOf(0) }
     val counter = remember { PushUpCounter() }
-    val selectedDayData = pushupViewModel.selectedDayData
+    val selectedDayData by pushupViewModel.selectedDayData.collectAsState()
     val userData = userViewmodel.userData
     val selectedDate = remember { getTodayDate("dd/MM/yyyy") }
 
-    Scaffold { innerPadding ->
+    // Ensure selectedDayData tracks today's date while on this screen
+    LaunchedEffect(selectedDate) {
+        pushupViewModel.setSelectedDate(selectedDate)
+    }
+
+    var color by remember { mutableStateOf(Color.White) }
+
+    LaunchedEffect(livePreviewViewModel.currentMode, livePreviewViewModel.isNoseVisibleInCamera) {
+        if (livePreviewViewModel.currentMode == CurrentMode.INIT.ordinal) {
+            color = if (!livePreviewViewModel.isNoseVisibleInCamera) {
+                Color.Red.copy(alpha = 0.4f)
+            } else {
+                Color.Green.copy(alpha = 0.4f)
+            }
+        } else if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal) {
+            color = if (!livePreviewViewModel.isNoseVisibleInCamera) {
+                Color.Red.copy(alpha = 0.4f)
+            } else {
+                Color.Transparent
+            }
+        }
+    }
+    Scaffold {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,28 +100,52 @@ fun PushUpScreen(
                     navController.popBackStack()
                     livePreviewViewModel.setCurrentMode(CurrentMode.INIT)
                 }
-                CameraPreview(
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    onFrame = { imageProxy ->
-                        processImage(imageProxy) { pose ->
-                            if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal) {
-                                reps = counter.updatePose(pose, livePreviewViewModel)
-                                if (reps == livePreviewViewModel.reps) {
-                                    livePreviewViewModel.incrementSets()
-                                    if (livePreviewViewModel.sets == livePreviewViewModel.totalSets) {
-                                        livePreviewViewModel.setCurrentMode(CurrentMode.COMPLETED)
-                                    } else {
-                                        livePreviewViewModel.setCurrentMode(CurrentMode.INTERVAL)
-                                        counter.resetCounter()
-                                        reps = 0
+                ) {
+                    CameraPreview(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        onFrame = { imageProxy ->
+                            processImage(imageProxy) { pose ->
+                                if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal) {
+                                    reps = counter.updatePose(pose, livePreviewViewModel, false)
+                                    if (reps == livePreviewViewModel.reps) {
+                                        livePreviewViewModel.incrementSets()
+                                        if (livePreviewViewModel.sets == livePreviewViewModel.totalSets) {
+                                            livePreviewViewModel.setCurrentMode(CurrentMode.COMPLETED)
+                                        } else {
+                                            livePreviewViewModel.setCurrentMode(CurrentMode.INTERVAL)
+                                            counter.resetCounter()
+                                            reps = 0
+                                        }
                                     }
+                                } else if (livePreviewViewModel.currentMode == CurrentMode.INIT.ordinal){
+                                    counter.updatePose(pose, livePreviewViewModel, true)
                                 }
                             }
                         }
-                    }
-                )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .innerShadow(
+                                RoundedCornerShape(5.dp),
+                                shadow = Shadow(
+                                    radius = 13.dp,
+                                    spread = 15.dp,
+                                    alpha = 1f,
+                                    color = color
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {}
+                }
+
+
 //                if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal)
 //                    GetRepsCountView(reps)
                 if (livePreviewViewModel.currentMode != CurrentMode.COMPLETED.ordinal)
@@ -115,7 +167,7 @@ fun PushUpScreen(
                             verticalArrangement = Arrangement.Center,
                         ) {
                             Text(
-                                "You have completed your push-ups! 🎉🎉",
+                                "Good Job!!\nYou have completed your push-ups sets!! 🎉🎉",
                                 fontFamily = workSansFamily,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 18.sp,
@@ -126,8 +178,8 @@ fun PushUpScreen(
                             Button(
                                 onClick = {
                                     val addPushupData = PushupQuickAdd(
-                                        reps = livePreviewViewModel.reps.toString(),
-                                        sets = (livePreviewViewModel.sets * livePreviewViewModel.reps).toString(),
+                                        sets = livePreviewViewModel.sets.toString(),
+                                        reps = (livePreviewViewModel.sets * livePreviewViewModel.reps).toString(),
                                         min = "0",
                                         secs = (livePreviewViewModel.interval * livePreviewViewModel.sets).toString()
                                     )

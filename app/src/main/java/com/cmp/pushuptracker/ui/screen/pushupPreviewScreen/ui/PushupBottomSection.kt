@@ -183,7 +183,7 @@ fun GetPushUpSection(viewModel: LivePreviewViewmodel, navController: NavHostCont
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    "Are you sure you want to stop? You can quick add.",
+                    "Are you sure you want to stop? You can always add it later with quick add.",
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,

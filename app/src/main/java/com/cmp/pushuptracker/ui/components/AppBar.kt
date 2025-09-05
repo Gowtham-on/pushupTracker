@@ -20,11 +20,13 @@ import com.cmp.pushuptracker.ui.theme.workSansFamily
 @Composable
 fun AppBar(
     title: String,
+    showBackButton: Boolean = true,
     onBackPress: () -> Unit
 ) {
     Box (
         modifier = Modifier.fillMaxWidth()
     ) {
+        if (showBackButton)
         IconButton(onClick = onBackPress) {
             Icon(
                 imageVector = Icons.Default.ArrowBackIosNew,

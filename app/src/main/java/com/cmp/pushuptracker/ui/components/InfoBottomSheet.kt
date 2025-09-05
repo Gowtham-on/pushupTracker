@@ -60,7 +60,7 @@ fun InfoBottomSheet(pushupData: PushUpEntity?, closeSheet: () -> Unit) {
                 "Calories",
                 estimatePushupCalories(
                     reps = pushupData?.reps ?: 0,
-                    durationSec = pushupData?.duration ?: 0,
+                    durationSec = pushupData?.duration?.toLong() ?: 0,
                     weightKg = 70.0,
                 ),
                 "Estimated Calories burnt",

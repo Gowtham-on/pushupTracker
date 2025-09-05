@@ -34,7 +34,7 @@ fun vibrate(context: Context, duration: Long = 50) {
 
 fun estimatePushupCalories(
     reps: Int,
-    durationSec: Int,
+    durationSec: Long,
     weightKg: Double,
     met: Double = 3.8
 ): String {

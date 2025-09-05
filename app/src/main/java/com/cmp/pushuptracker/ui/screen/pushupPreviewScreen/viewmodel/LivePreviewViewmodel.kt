@@ -8,11 +8,19 @@ import androidx.lifecycle.ViewModel
 import com.cmp.pushuptracker.database.repository.PushupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import android.app.Application
+import android.content.Context
+import android.speech.tts.TextToSpeech
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.Locale
 
 @HiltViewModel
 class LivePreviewViewmodel @Inject constructor(
-    private val repository: PushupRepository  // optional dependency
-) : ViewModel() {
+    private val repository: PushupRepository,
+    @ApplicationContext private val context: Context
+) : ViewModel(), TextToSpeech.OnInitListener {
 
     var currentMode by mutableIntStateOf(CurrentMode.INIT.ordinal)
         private set
@@ -79,6 +87,40 @@ class LivePreviewViewmodel @Inject constructor(
         currentPhase = phase
     }
     //////////////////////////////////////////////////////////////////////////////
+
+    private var tts: TextToSpeech? = null
+    private var ttsReady = false
+
+    var isNoseVisibleInCamera by mutableStateOf(false)
+
+    fun setNoseVisible(visible: Boolean) {
+        isNoseVisibleInCamera = visible
+    }
+
+    init {
+        tts = TextToSpeech(context, this)
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            tts?.language = Locale.US
+            tts?.setPitch(1.0f)
+            tts?.setSpeechRate(1.0f)
+            ttsReady = true
+        }
+    }
+
+    fun speak(message: String, flush: Boolean = true) {
+        if (!ttsReady) return
+        val mode = if (flush) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+        tts?.speak(message, mode, null, "live-preview-tts")
+    }
+
+    override fun onCleared() {
+        tts?.shutdown()
+        tts = null
+        super.onCleared()
+    }
 }
 
 enum class CurrentMode {

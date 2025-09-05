@@ -24,7 +24,7 @@ object PushupUtils {
 
         val user = userData
         user.totalReps += addPushupData.reps.toInt()
-        if (user.best < addPushupData.reps.toInt() == true) {
+        if (user.best < addPushupData.reps.toInt()) {
             user.best = addPushupData.reps.toInt()
         }
         user.totalWorkoutDuration += tempData.duration + (addPushupData.min.toInt() * 60) + addPushupData.secs.toInt()

@@ -28,9 +28,6 @@ class UserViewmodel @Inject constructor(
     fun updateUserData(user: UserEntity) {
         viewModelScope.launch {
             repository.updateSession(user)
-            repository.getUserDataFromDb().collect {
-                userData = it.firstOrNull() ?: UserEntity()
-            }
         }
     }
 

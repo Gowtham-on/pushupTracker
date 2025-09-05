@@ -127,7 +127,7 @@ fun GetPersonalBestCard(userViewmodel: UserViewmodel) {
 
 @Composable
 fun GetChallengeCard(pushupViewModel: PushupViewModel) {
-    val todayPushup = pushupViewModel.todayData
+    val todayPushup by pushupViewModel.todayData.collectAsState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -163,7 +163,7 @@ fun GetChallengeCard(pushupViewModel: PushupViewModel) {
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                "Challenge of the Day",
+                "Daily Challenge",
                 fontFamily = workSansFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,

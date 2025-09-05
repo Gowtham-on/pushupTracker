@@ -16,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -37,9 +38,13 @@ fun GetStatsSection(userData: UserEntity) {
     val reps = remember { userData.totalReps }
     val best = remember { userData.best }
     val totalDuration = remember { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
-    val totalCaloriesBurnt =
-        remember { estimatePushupCalories(reps, totalDuration.toIntOrNull() ?: 0, userData.weight) }
+    var totalCaloriesBurnt =
+        remember { estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight) }
 
+    LaunchedEffect(reps,) {
+        totalCaloriesBurnt = estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight)
+
+    }
     Column {
         Text(
             "Achievements",

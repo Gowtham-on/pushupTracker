@@ -80,42 +80,42 @@ fun GetPermissionSection() {
             },
             openSettings = { openCameraPermissionSettings(context) }
         )
-        PermissionToggleRow(
-            label = "Detect Shoulder",
-            desc = "Mark shoulder position during workout",
-            isGranted = shoulderPref,
-            onRequest = {
-                shoulderPref = !shoulderPref
-                PreferenceUtil.savePushupSettingsPreference(
-                    PreferenceUtil.SHOULDER_DETECT, context, shoulderPref
-                )
-            },
-            openSettings = { openCameraPermissionSettings(context) }
-        )
-        PermissionToggleRow(
-            label = "Detect Elbow",
-            desc = "Mark elbow position during workout",
-            isGranted = elbowPref,
-            onRequest = {
-               elbowPref = !elbowPref
-                PreferenceUtil.savePushupSettingsPreference(
-                    PreferenceUtil.ELBOW_DETECT, context, elbowPref
-                )
-            },
-            openSettings = { openCameraPermissionSettings(context) }
-        )
-        PermissionToggleRow(
-            label = "Detect Hip",
-            desc = "Mark elbow position during workout",
-            isGranted = hipPref,
-            onRequest = {
-               hipPref = !hipPref
-                PreferenceUtil.savePushupSettingsPreference(
-                    PreferenceUtil.HIP_DETECT, context, hipPref
-                )
-            },
-            openSettings = { openCameraPermissionSettings(context) }
-        )
+//        PermissionToggleRow(
+//            label = "Detect Shoulder",
+//            desc = "Mark shoulder position during workout",
+//            isGranted = shoulderPref,
+//            onRequest = {
+//                shoulderPref = !shoulderPref
+//                PreferenceUtil.savePushupSettingsPreference(
+//                    PreferenceUtil.SHOULDER_DETECT, context, shoulderPref
+//                )
+//            },
+//            openSettings = { openCameraPermissionSettings(context) }
+//        )
+//        PermissionToggleRow(
+//            label = "Detect Elbow",
+//            desc = "Mark elbow position during workout",
+//            isGranted = elbowPref,
+//            onRequest = {
+//               elbowPref = !elbowPref
+//                PreferenceUtil.savePushupSettingsPreference(
+//                    PreferenceUtil.ELBOW_DETECT, context, elbowPref
+//                )
+//            },
+//            openSettings = { openCameraPermissionSettings(context) }
+//        )
+//        PermissionToggleRow(
+//            label = "Detect Hip",
+//            desc = "Mark elbow position during workout",
+//            isGranted = hipPref,
+//            onRequest = {
+//               hipPref = !hipPref
+//                PreferenceUtil.savePushupSettingsPreference(
+//                    PreferenceUtil.HIP_DETECT, context, hipPref
+//                )
+//            },
+//            openSettings = { openCameraPermissionSettings(context) }
+//        )
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current

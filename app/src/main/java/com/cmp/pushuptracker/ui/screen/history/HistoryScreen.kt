@@ -38,7 +38,7 @@ fun HistoryScreen(
     )
 
     Column {
-        AppBar("Statistics") {
+        AppBar("Statistics", false) {
             navController.popBackStack()
         }
         Column(
