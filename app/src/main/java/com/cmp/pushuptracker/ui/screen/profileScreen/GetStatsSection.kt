@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -30,19 +29,20 @@ import androidx.compose.ui.unit.sp
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.database.entity.UserEntity
 import com.cmp.pushuptracker.ui.theme.workSansFamily
-import com.cmp.pushuptracker.utils.TimeUtils.getMinsSecFromSeconds
+import com.cmp.pushuptracker.utils.TimeUtils.getHrsMinsSecFromSeconds
 import com.cmp.pushuptracker.utils.estimatePushupCalories
 
 @Composable
 fun GetStatsSection(userData: UserEntity) {
     val reps = remember { userData.totalReps }
     val best = remember { userData.best }
-    val totalDuration = remember { getMinsSecFromSeconds(userData.totalWorkoutDuration) }
+    val totalDuration = remember { getHrsMinsSecFromSeconds(userData.totalWorkoutDuration) }
     var totalCaloriesBurnt =
         remember { estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight) }
 
-    LaunchedEffect(reps,) {
-        totalCaloriesBurnt = estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight)
+    LaunchedEffect(reps) {
+        totalCaloriesBurnt =
+            estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight)
 
     }
     Column {

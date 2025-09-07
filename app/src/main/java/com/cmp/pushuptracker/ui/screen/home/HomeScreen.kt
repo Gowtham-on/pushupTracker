@@ -133,7 +133,7 @@ fun HomeScreen(
                     )
                     GetHomePushupCard(
                         "Time",
-                        (TimeUtils.getMinsSecFromSeconds(
+                        (TimeUtils.getHrsMinsSecFromSeconds(
                             pushupData?.duration?.toLong() ?: 0L
                         )).toString(),
                         "Workout duration",

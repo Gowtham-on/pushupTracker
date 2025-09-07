@@ -39,15 +39,18 @@ object TimeUtils {
         return formatter.format(date)
     }
 
-    fun getMinsSecFromSeconds(interval: Long): String {
-        val minutes = interval / 60
+    fun getHrsMinsSecFromSeconds(interval: Long): String {
+        val hours = interval / 3600
+        val minutes = (interval % 3600) / 60
         val seconds = interval % 60
 
         return buildString {
-            if (minutes > 0) append("$minutes min")
-            if (minutes > 0 && seconds > 0) append(" ")
-            if (seconds > 0) append("$seconds sec")
-            if (minutes == 0L && seconds == 0L) append("0 sec")
+            if (hours > 0) append("${hours} hr")
+            if (hours > 0 && minutes > 0) append(" ")
+            if (minutes > 0) append("${minutes} min")
+            if ((hours > 0 || minutes > 0) && seconds > 0) append(" ")
+            if (seconds > 0) append("${seconds} sec")
+            if (hours == 0L && minutes == 0L && seconds == 0L) append("0 sec")
         }
     }
 

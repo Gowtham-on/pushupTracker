@@ -1,6 +1,7 @@
 package com.cmp.pushuptracker.ui.screen.home
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -38,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.ui.components.AppBar
@@ -46,10 +46,6 @@ import com.cmp.pushuptracker.ui.components.RestIntervalSlider
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.workSansFamily
-import com.cmp.pushuptracker.utils.PreferenceUtil
-import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_INTERVAL
-import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_REP
-import com.cmp.pushuptracker.utils.PreferenceUtil.TOTAL_SET
 import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 
@@ -99,6 +95,17 @@ fun StartWorkoutScreen(
                 GetPrimaryButton(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    if (sets == 0) {
+                        Toast.makeText(context, "You must have atleast one set", Toast.LENGTH_SHORT).show()
+                        return@GetPrimaryButton
+                    } else if (reps == 0) {
+                        Toast.makeText(context, "You must have atleast one rep", Toast.LENGTH_SHORT).show()
+                        return@GetPrimaryButton
+                    } else if (interval == 0) {
+                        Toast.makeText(context, "You must have a break between each sets", Toast.LENGTH_SHORT).show()
+                        return@GetPrimaryButton
+                    }
+
                     livePreviewViewmodel.setupPushupDataValues(
                         sets,
                         reps,
@@ -224,7 +231,7 @@ fun GetInfoCard(totalReps: Int, interval: Int) {
 
     val durationText =
         if (totalReps == 0) "0 sec"
-        else TimeUtils.getMinsSecFromSeconds(interval.toLong())
+        else TimeUtils.getHrsMinsSecFromSeconds(interval.toLong())
 
     Box(
         modifier = Modifier

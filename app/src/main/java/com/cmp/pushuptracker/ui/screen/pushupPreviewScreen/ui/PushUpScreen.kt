@@ -52,6 +52,7 @@ import com.cmp.pushuptracker.utils.PushupUtils
 import com.cmp.pushuptracker.utils.TimeUtils.getTodayDate
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -90,6 +91,34 @@ fun PushUpScreen(
             }
         }
     }
+
+    var workoutTimeTaken by remember { mutableIntStateOf(0) }
+    var isRunning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isRunning) {
+        while (isRunning) {
+            delay(1000L)
+            workoutTimeTaken++
+        }
+    }
+
+    LaunchedEffect(livePreviewViewModel.currentMode) {
+        when (livePreviewViewModel.currentMode) {
+            CurrentMode.PUSHUP.ordinal -> {
+                isRunning = true  // start/resume ticking
+            }
+
+            CurrentMode.INTERVAL.ordinal -> {
+                isRunning = false // pause ticking
+            }
+
+            CurrentMode.COMPLETED.ordinal -> {
+                isRunning = false // stop ticking
+                // workoutTimeTaken now has total duration
+            }
+        }
+    }
+
     Scaffold {
         Box(
             modifier = Modifier
@@ -123,7 +152,7 @@ fun PushUpScreen(
                                             reps = 0
                                         }
                                     }
-                                } else if (livePreviewViewModel.currentMode == CurrentMode.INIT.ordinal){
+                                } else if (livePreviewViewModel.currentMode == CurrentMode.INIT.ordinal) {
                                     counter.updatePose(pose, livePreviewViewModel, true)
                                 }
                             }
@@ -135,14 +164,28 @@ fun PushUpScreen(
                             .innerShadow(
                                 RoundedCornerShape(5.dp),
                                 shadow = Shadow(
-                                    radius = 13.dp,
-                                    spread = 15.dp,
+                                    radius = 5.dp,
+                                    spread = 3.dp,
                                     alpha = 1f,
                                     color = color
                                 )
                             ),
-                        contentAlignment = Alignment.Center
-                    ) {}
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        if (livePreviewViewModel.currentMode == CurrentMode.INIT.ordinal && !livePreviewViewModel.isNoseVisibleInCamera)
+                            Text(
+                                "Keep your face facing in front of the camera",
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(color = Color.Gray.copy(alpha = 0.7f))
+                                    .padding(5.dp),
+                                fontFamily = workSansFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center
+                            )
+                    }
                 }
 
 
@@ -181,7 +224,7 @@ fun PushUpScreen(
                                         sets = livePreviewViewModel.sets.toString(),
                                         reps = (livePreviewViewModel.sets * livePreviewViewModel.reps).toString(),
                                         min = "0",
-                                        secs = (livePreviewViewModel.interval * livePreviewViewModel.sets).toString()
+                                        secs = (workoutTimeTaken).toString()
                                     )
                                     livePreviewViewModel.clearData()
                                     PushupUtils.addPushupInDb(

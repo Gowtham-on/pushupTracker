@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +46,7 @@ import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.vibrate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.ui.graphics.shadow.Shadow
 
 @Composable
 fun GetHabitCalendarView(
@@ -69,7 +72,7 @@ fun GetHabitCalendarView(
 
         var dateToCheck = today
 
-        while (missedDays < 3) {
+        while (missedDays < 4) {
             if (completedDates.contains(dateToCheck)) {
                 currentStreak++
                 missedDays = 0 // reset missed streak
@@ -108,10 +111,19 @@ fun GetHabitCalendarView(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
-        ),
+//        elevation = CardDefaults.cardElevation(
+//            defaultElevation = 10.dp
+//        ),
         modifier = Modifier
+            .dropShadow(
+                shape = RoundedCornerShape(10.dp),
+                shadow = Shadow(
+                    radius = 10.dp,
+                    spread = 2.dp,
+                    alpha = 1f,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                )
+            )
             .fillMaxWidth()
     ) {
         Column {
