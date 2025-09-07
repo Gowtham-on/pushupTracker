@@ -23,17 +23,17 @@ fun AppBar(
     showBackButton: Boolean = true,
     onBackPress: () -> Unit
 ) {
-    Box (
+    Box(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (showBackButton)
-        IconButton(onClick = onBackPress) {
-            Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
-                contentDescription = "Navigate Back",
-                modifier = Modifier.size(20.dp)
-            )
-        }
+            IconButton(onClick = onBackPress) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Navigate Back",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         Text(
             title,
             fontFamily = workSansFamily,
