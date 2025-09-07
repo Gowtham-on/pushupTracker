@@ -47,11 +47,15 @@ fun HistoryScreen(
         ) {
             Spacer(Modifier.height(16.dp))
             GetHeatMap(datePushupMap) {
-                selectedDate = it
+                selectedDate = it;
                 canShowInfoBottomSheet = true
             }
             Spacer(Modifier.height(16.dp))
             GetRepsChart(datePushupMap)
+            Spacer(Modifier.height(16.dp))
+            GetRepsPerMinChart(datePushupMap)
+//            Spacer(Modifier.height(16.dp))
+//            GetAvgRepsPerSet(datePushupMap)
             Spacer(Modifier.height(16.dp))
             GetDurationChart(datePushupMap)
             Spacer(Modifier.height(16.dp))

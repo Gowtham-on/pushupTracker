@@ -20,6 +20,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
@@ -47,13 +48,13 @@ fun LineChartCompose(
                 setBackgroundColor(Color.TRANSPARENT)
                 setDrawGridBackground(false)
                 description = Description().apply { text = "" }
-
                 axisRight.isEnabled = false
                 axisLeft.isEnabled = true
                 axisLeft.apply {
                     textColor = onBackgroundColor
                     textSize = 12f
                     setDrawGridLines(false)
+                    axisMinimum = 0f
                 }
 
                 xAxis.apply {
@@ -61,7 +62,7 @@ fun LineChartCompose(
                     textSize = 12f
                     setDrawGridLines(false)
                     granularity = 1f
-                    valueFormatter = XAxisValueFormatter(xAxisValues)
+                    valueFormatter = IndexAxisValueFormatter(xAxisValues)
                     textColor = onBackgroundColor
                 }
 

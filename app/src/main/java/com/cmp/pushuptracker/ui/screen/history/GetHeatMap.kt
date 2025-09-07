@@ -1,6 +1,5 @@
 package com.cmp.pushuptracker.ui.screen.history
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
