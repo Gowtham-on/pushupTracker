@@ -22,7 +22,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Shrink code and resources for much smaller release builds
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -61,14 +63,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
-    implementation(libs.tasks.vision)
+    // Remove unused heavy dependency to reduce size
+    // implementation(libs.tasks.vision)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    implementation(libs.pose.detection)
-    // Pose detection with accurate models
+    // Use only the accurate pose detection model (remove base to avoid duplicate models)
     implementation(libs.pose.detection.accurate)
 
     // Material 3

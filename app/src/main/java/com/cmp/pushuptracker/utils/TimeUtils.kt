@@ -45,12 +45,19 @@ object TimeUtils {
         val seconds = interval % 60
 
         return buildString {
-            if (hours > 0) append("${hours} hr")
-            if (hours > 0 && minutes > 0) append(" ")
-            if (minutes > 0) append("${minutes} min")
-            if ((hours > 0 || minutes > 0) && seconds > 0) append(" ")
-            if (seconds > 0) append("${seconds} sec")
-            if (hours == 0L && minutes == 0L && seconds == 0L) append("0 sec")
+            when {
+                hours > 0 -> {
+                    append("$hours hr")
+                    if (minutes > 0) append(" $minutes min")
+                }
+                minutes > 0 -> {
+                    append("$minutes min")
+                    if (seconds > 0) append(" $seconds sec")
+                }
+                else -> {
+                    append("$seconds sec")
+                }
+            }
         }
     }
 

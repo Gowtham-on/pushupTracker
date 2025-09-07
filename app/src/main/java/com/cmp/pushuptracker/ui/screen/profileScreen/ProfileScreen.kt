@@ -140,12 +140,12 @@ fun ProfileScreen(
             Column {
                 GetThemeSection(profileNavController, utilViewmodel)
                 GetRedirectSection("Privacy Policy") {
-                    val url = "https://talklater-d0cc6.web.app/privacy-policy.html"
+                    val url = "https://pushuptracker-c9c08.web.app/"
                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                     homeNavController.context.startActivity(intent)
                 }
                 GetRedirectSection("Feature Request") {
-                    val url = ""
+                    val url = "https://pushuptracker.featurebase.app/dashboard/posts"
                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                     homeNavController.context.startActivity(intent)
                 }
