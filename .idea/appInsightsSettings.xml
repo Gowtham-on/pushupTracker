@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.cmp.pushuptracker" />
+                  <option name="mobileSdkAppId" value="1:780975392319:android:8fa7fddd3d106014a55a8a" />
+                  <option name="projectId" value="pushuptracker-c9c08" />
+                  <option name="projectNumber" value="780975392319" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

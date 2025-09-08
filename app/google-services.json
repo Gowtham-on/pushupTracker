@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "780975392319",
+    "project_id": "pushuptracker-c9c08",
+    "storage_bucket": "pushuptracker-c9c08.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780975392319:android:8fa7fddd3d106014a55a8a",
+        "android_client_info": {
+          "package_name": "com.cmp.pushuptracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlLBKBYjrtKjNg3vlrIZQ5SlvvnWYo5MY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
