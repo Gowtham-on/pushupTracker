@@ -1,5 +1,6 @@
 package com.cmp.pushuptracker.ui.screen.home
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.animation.core.animateIntAsState
@@ -47,8 +48,14 @@ import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.TimeUtils
+import com.cmp.pushuptracker.utils.openCameraPermissionSettings
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun StartWorkoutScreen(
@@ -60,6 +67,7 @@ fun StartWorkoutScreen(
     var interval by remember { mutableIntStateOf(0) }
     var sets by remember { mutableIntStateOf(0) }
     var reps by remember { mutableIntStateOf(0) }
+    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
 
     Scaffold { innerPadding ->
         Column(
@@ -95,6 +103,15 @@ fun StartWorkoutScreen(
                 GetPrimaryButton(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+
+                    if (!cameraPermission.status.isGranted) {
+                        cameraPermission.launchPermissionRequest()
+                        Toast.makeText(context, "Camera permission is needed to proceed", Toast.LENGTH_SHORT).show()
+                        return@GetPrimaryButton
+                    } else {
+                        openCameraPermissionSettings(context)
+                    }
+
                     if (sets == 0) {
                         Toast.makeText(context, "You must have atleast one set", Toast.LENGTH_SHORT).show()
                         return@GetPrimaryButton

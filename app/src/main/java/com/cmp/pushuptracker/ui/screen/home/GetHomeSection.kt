@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,6 +60,27 @@ fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewMode
     GetHabitCalendarView(datePushupMap, pushupDataState) {
         selectedDate = it
         canShowInfoBottomSheet = true
+    }
+    Spacer(Modifier.height(10.dp))
+    Row (
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+    ){
+        Image(
+            imageVector = Icons.Default.Info, contentDescription = "Info",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.outline),
+            modifier = Modifier
+                .size(15.dp)
+        )
+        Spacer(Modifier.width(5.dp))
+        Text(
+            "Don’t miss 3 days in a row, your streak depends on it!",
+            fontFamily = workSansFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
     Spacer(Modifier.height(25.dp))
     GetWeeklyGoalsSection(pushupDataState)

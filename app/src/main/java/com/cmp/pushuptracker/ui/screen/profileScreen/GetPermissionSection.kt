@@ -2,6 +2,7 @@ package com.cmp.pushuptracker.ui.screen.profileScreen
 
 
 import android.Manifest
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -72,11 +73,7 @@ fun GetPermissionSection() {
             desc = "To analyze pose during workout",
             isGranted = isCameraPermissionGranted,
             onRequest = {
-                if (cameraPermission.status.shouldShowRationale)
-                    cameraPermission.launchPermissionRequest()
-                else openCameraPermissionSettings(
-                    context
-                )
+                openCameraPermissionSettings(context)
             },
             openSettings = { openCameraPermissionSettings(context) }
         )
