@@ -108,8 +108,6 @@ fun StartWorkoutScreen(
                         cameraPermission.launchPermissionRequest()
                         Toast.makeText(context, "Camera permission is needed to proceed", Toast.LENGTH_SHORT).show()
                         return@GetPrimaryButton
-                    } else {
-                        openCameraPermissionSettings(context)
                     }
 
                     if (sets == 0) {

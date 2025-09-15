@@ -329,7 +329,7 @@ fun GetQuickAddSheet(
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
                         .padding(vertical = 6.dp)
                 )
