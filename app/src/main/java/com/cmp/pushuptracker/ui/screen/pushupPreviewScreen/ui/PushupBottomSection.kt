@@ -112,7 +112,7 @@ fun GetPushUpSection(viewModel: LivePreviewViewmodel, navController: NavHostCont
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
@@ -120,7 +120,7 @@ fun GetPushUpSection(viewModel: LivePreviewViewmodel, navController: NavHostCont
                     fontFamily = workSansFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f)
                 )
             }

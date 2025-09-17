@@ -45,6 +45,8 @@ import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.components.RestIntervalSlider
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.CurrentMode
+import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.CurrentPhase
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.TimeUtils
@@ -104,6 +106,7 @@ fun StartWorkoutScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
 
+                    livePreviewViewmodel.setCurrentMode(CurrentMode.INIT)
                     if (!cameraPermission.status.isGranted) {
                         cameraPermission.launchPermissionRequest()
                         Toast.makeText(context, "Camera permission is needed to proceed", Toast.LENGTH_SHORT).show()
