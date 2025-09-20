@@ -1,7 +1,8 @@
 package com.cmp.pushuptracker.ui.screen.home
 
+import android.Manifest
 import android.annotation.SuppressLint
-import android.util.Log
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,11 +23,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +61,7 @@ import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.PushupUtils
+import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.ReviewPromptManager
 import com.cmp.pushuptracker.utils.estimatePushupCalories
@@ -72,7 +77,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.abs
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -85,6 +95,8 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
     var isScrollingUp by remember { mutableStateOf(true) }
     val context = LocalContext.current
+    val notificationPermissionState = rememberNotificationPermissionState()
+    var showNotificationPrompt by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(scrollState) {
         var previousValue = scrollState.value
@@ -97,6 +109,19 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         ReviewPromptManager.maybeAskForReview(context)
+        if (notificationPermissionState != null) {
+            val shouldAsk = PreferenceUtil.shouldAskForNotificationPermission(context)
+            if (shouldAsk && !notificationPermissionState.status.isGranted) {
+                showNotificationPrompt = true
+            }
+        }
+    }
+
+    LaunchedEffect(notificationPermissionState?.status?.isGranted) {
+        if (notificationPermissionState?.status?.isGranted == true) {
+            showNotificationPrompt = false
+            PreferenceUtil.markNotificationPermissionAsked(context)
+        }
     }
 
     Box {
@@ -115,7 +140,23 @@ fun HomeScreen(
                 fontSize = 25.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(24.dp))
+            if (showNotificationPrompt && notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
+                Spacer(Modifier.height(16.dp))
+                NotificationPermissionPrompt(
+                    showRationale = notificationPermissionState.status.shouldShowRationale,
+                    onAllow = {
+                        PreferenceUtil.markNotificationPermissionAsked(context)
+                        notificationPermissionState.launchPermissionRequest()
+                    },
+                    onDismiss = {
+                        PreferenceUtil.markNotificationPermissionAsked(context)
+                        showNotificationPrompt = false
+                    }
+                )
+                Spacer(Modifier.height(16.dp))
+            } else {
+                Spacer(Modifier.height(24.dp))
+            }
             Column(
                 modifier = Modifier
                     .verticalScroll(state = scrollState),
@@ -169,6 +210,66 @@ fun HomeScreen(
             ExpandingFAB(navController) {
                 showQuickAddShet = true
             }
+    }
+}
+
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun rememberNotificationPermissionState() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+} else {
+    null
+}
+
+@Composable
+private fun NotificationPermissionPrompt(
+    showRationale: Boolean,
+    onAllow: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = if (showRationale) "Enable notifications" else "Stay on track",
+                fontFamily = workSansFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = if (showRationale) {
+                    "Turn on notifications so we can remind you about your daily push-up goals."
+                } else {
+                    "Allow push notifications to get gentle nudges"
+                },
+                fontFamily = workSansFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Not now")
+                }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = onAllow) {
+                    Text("Allow")
+                }
+            }
+        }
     }
 }
 

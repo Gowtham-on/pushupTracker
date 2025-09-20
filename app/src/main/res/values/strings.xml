@@ -8,4 +8,9 @@
     <string name="pref_key_front_camera_picture_size" translatable="false">fcpts</string>
     <string name="pref_key_live_preview_pose_detection_performance_mode" translatable="false">lppdpm</string>
 
+    <string name="reminder_morning_title">Morning Push-up Check-in</string>
+    <string name="reminder_morning_message">You haven\'t logged today\'s push-ups yet. Start a quick set now to keep your momentum!</string>
+    <string name="reminder_evening_title">Evening Push-up Reminder</string>
+    <string name="reminder_evening_message">There\'s still time to finish today\'s push-ups. Stay consistent and crush your goals!</string>
+
 </resources>

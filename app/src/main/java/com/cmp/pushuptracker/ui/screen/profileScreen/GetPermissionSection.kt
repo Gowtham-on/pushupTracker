@@ -2,7 +2,6 @@ package com.cmp.pushuptracker.ui.screen.profileScreen
 
 
 import android.Manifest
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,10 +31,10 @@ import com.cmp.pushuptracker.ui.components.ToggleSwitch
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.utils.openCameraPermissionSettings
+import com.cmp.pushuptracker.utils.openNotificationSettings
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -53,7 +52,8 @@ fun GetPermissionSection() {
     var hipPref by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        shoulderPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.SHOULDER_DETECT, context)
+        shoulderPref =
+            PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.SHOULDER_DETECT, context)
         elbowPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.ELBOW_DETECT, context)
         hipPref = PreferenceUtil.getPushupSettingsPreference(PreferenceUtil.HIP_DETECT, context)
     }
@@ -74,6 +74,15 @@ fun GetPermissionSection() {
             isGranted = isCameraPermissionGranted,
             onRequest = {
                 openCameraPermissionSettings(context)
+            },
+            openSettings = { openCameraPermissionSettings(context) }
+        )
+        PermissionToggleRow(
+            label = "Notification",
+            desc = "To remind you to workout and offers",
+            isGranted = isNotificationPermissionGranted,
+            onRequest = {
+                openNotificationSettings(context)
             },
             openSettings = { openCameraPermissionSettings(context) }
         )

@@ -1,6 +1,7 @@
 package com.cmp.pushuptracker.utils
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import androidx.core.content.edit
 
 object PreferenceUtil {
@@ -20,6 +21,8 @@ object PreferenceUtil {
     private const val REVIEW_LAST_PROMPT_AT = "review_last_prompt_at"
     private const val REVIEW_MIN_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000L
     private const val REVIEW_LAUNCH_THRESHOLD = 5
+    private const val NOTIFICATION_PREF = "notification_pref"
+    private const val NOTIFICATION_PROMPTED = "notification_prompted"
 
     fun savePushupSettingsPreference(prefName: String, context: Context, enabled: Boolean) {
         context
@@ -74,7 +77,7 @@ object PreferenceUtil {
     }
 
     fun shouldPromptForReview(context: Context): Boolean {
-        return true
+        if (isDebuggable(context)) return true
         val prefs = context.getSharedPreferences(REVIEW_PREF, Context.MODE_PRIVATE)
         if (prefs.getBoolean(REVIEW_SHOWN, false)) return false
 
@@ -87,6 +90,7 @@ object PreferenceUtil {
     }
 
     fun markReviewPrompted(context: Context, completed: Boolean) {
+        if (isDebuggable(context)) return
         context
             .getSharedPreferences(REVIEW_PREF, Context.MODE_PRIVATE)
             .edit {
@@ -94,6 +98,25 @@ object PreferenceUtil {
                 if (completed) {
                     putBoolean(REVIEW_SHOWN, true)
                 }
+            }
+    }
+
+    private fun isDebuggable(context: Context): Boolean {
+        return (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+
+    fun shouldAskForNotificationPermission(context: Context): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return false
+        val prefs = context.getSharedPreferences(NOTIFICATION_PREF, Context.MODE_PRIVATE)
+        val alreadyPrompted = prefs.getBoolean(NOTIFICATION_PROMPTED, false)
+        return !alreadyPrompted
+    }
+
+    fun markNotificationPermissionAsked(context: Context) {
+        context
+            .getSharedPreferences(NOTIFICATION_PREF, Context.MODE_PRIVATE)
+            .edit {
+                putBoolean(NOTIFICATION_PROMPTED, true)
             }
     }
 }
