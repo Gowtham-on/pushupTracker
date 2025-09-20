@@ -103,6 +103,7 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.mpandroidchart)
+    implementation(libs.play.review.ktx)
 
 
 }

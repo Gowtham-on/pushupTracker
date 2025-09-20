@@ -58,6 +58,7 @@ import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.PushupUtils
 import com.cmp.pushuptracker.utils.TimeUtils
+import com.cmp.pushuptracker.utils.ReviewPromptManager
 import com.cmp.pushuptracker.utils.estimatePushupCalories
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
@@ -83,6 +84,7 @@ fun HomeScreen(
     var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     var isScrollingUp by remember { mutableStateOf(true) }
+    val context = LocalContext.current
 
     LaunchedEffect(scrollState) {
         var previousValue = scrollState.value
@@ -91,6 +93,10 @@ fun HomeScreen(
                 isScrollingUp = currentValue < previousValue + 10
                 previousValue = currentValue
             }
+    }
+
+    LaunchedEffect(Unit) {
+        ReviewPromptManager.maybeAskForReview(context)
     }
 
     Box {

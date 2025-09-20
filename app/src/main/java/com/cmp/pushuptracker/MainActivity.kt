@@ -76,6 +76,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        PreferenceUtil.recordAppLaunch(this)
         setContent {
             val utilViewmodel = hiltViewModel<UtilViewmodel>()
             val userViewmodel = hiltViewModel<UserViewmodel>()
