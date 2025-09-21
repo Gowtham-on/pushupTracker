@@ -80,7 +80,7 @@ fun PaywallScreen(
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        AppBar("Pushup Plus") { navController.popBackStack( }
+        AppBar("Pushup Plus") { navController.popBackStack() }
 
         if (uiState.loading && uiState.plans.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

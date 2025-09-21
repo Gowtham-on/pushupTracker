@@ -11,10 +11,6 @@ object PreferenceUtil {
     const val ELBOW_DETECT = "elbow_detect"
     const val HIP_DETECT = "hip_detect"
 
-    const val TOTAL_INTERVAL = "total_interval"
-    const val TOTAL_REP = "total_rep"
-    const val TOTAL_SET = "total_set"
-
     private const val REVIEW_PREF = "review_pref"
     private const val REVIEW_LAUNCH_COUNT = "review_launch_count"
     private const val REVIEW_SHOWN = "review_shown"
@@ -24,34 +20,11 @@ object PreferenceUtil {
     private const val NOTIFICATION_PREF = "notification_pref"
     private const val NOTIFICATION_PROMPTED = "notification_prompted"
 
-    fun savePushupSettingsPreference(prefName: String, context: Context, enabled: Boolean) {
-        context
-            .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
-            .edit {
-                putBoolean(prefName, enabled)
-            }
-    }
 
     fun getPushupSettingsPreference(prefName: String, context: Context): Boolean {
         val defaultTheme = context
             .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
             .getBoolean(prefName, false)
-
-        return defaultTheme
-    }
-
-    fun savePreviewPushupPref(prefName: String, context: Context, count: Int) {
-        context
-            .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
-            .edit {
-                putInt(prefName, count)
-            }
-    }
-
-    fun getPreviewPushupPref(prefName: String, context: Context): Int {
-        val defaultTheme = context
-            .getSharedPreferences(PUSHUP_PREF, Context.MODE_PRIVATE)
-            .getInt(prefName, 0)
 
         return defaultTheme
     }

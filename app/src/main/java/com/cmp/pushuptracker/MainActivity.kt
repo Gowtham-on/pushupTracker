@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
@@ -184,9 +183,9 @@ fun PushUpAppNavigation(
 fun CustomBottomNavBar(navController: NavHostController) {
     val items = remember {
         listOf(
-        Screen.Home,
-        Screen.History,
-        Screen.Profile
+            Screen.Home,
+            Screen.History,
+            Screen.Profile
         )
     }
     val navBackStackEntry by navController.currentBackStackEntryAsState()

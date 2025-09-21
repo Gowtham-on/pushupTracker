@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,10 +37,6 @@ class BillingViewModel @Inject constructor(
     )
 
     init {
-        billingRepository.startConnection()
-    }
-
-    fun refresh() {
         billingRepository.startConnection()
     }
 

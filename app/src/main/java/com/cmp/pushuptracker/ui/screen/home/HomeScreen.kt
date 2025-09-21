@@ -55,20 +55,23 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
-import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.billing.BillingViewModel
 import com.cmp.pushuptracker.ui.components.ExpandingFAB
+import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
-import com.cmp.pushuptracker.ui.navigationUtils.Screen
+import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.PushupUtils
-import com.cmp.pushuptracker.utils.PreferenceUtil
-import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.ReviewPromptManager
+import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.utils.estimatePushupCalories
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -78,11 +81,6 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
-import kotlin.math.abs
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -240,11 +238,12 @@ fun HomeScreen(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun rememberNotificationPermissionState() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
-} else {
-    null
-}
+private fun rememberNotificationPermissionState() =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        null
+    }
 
 @Composable
 private fun NotificationPermissionPrompt(

@@ -165,7 +165,7 @@ class BillingRepository @Inject constructor(
         }
     }
 
-    private suspend fun acknowledgePurchase(purchase: Purchase) {
+    private fun acknowledgePurchase(purchase: Purchase) {
         val params = AcknowledgePurchaseParams.newBuilder()
             .setPurchaseToken(purchase.purchaseToken)
             .build()

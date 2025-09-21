@@ -2,10 +2,8 @@ package com.cmp.pushuptracker.ui.navigationUtils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
@@ -15,7 +13,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object StartWorkout : Screen("startWorkout", "Start Workout")
     object LivePreviewScreen : Screen("livePreviewScreen", "Live Preview")
     object ThemeChangeView : Screen("themeChangeView", "Theme")
-    object OnBoardingOne: Screen("onBoardingOne", "OnBoardingOne")
-    object OnBoardingTwo: Screen("onBoardingTwo", "OnBoardingTwo")
+    object OnBoardingOne : Screen("onBoardingOne", "OnBoardingOne")
+    object OnBoardingTwo : Screen("onBoardingTwo", "OnBoardingTwo")
     object Paywall : Screen("paywall", "Pushup Plus")
 }

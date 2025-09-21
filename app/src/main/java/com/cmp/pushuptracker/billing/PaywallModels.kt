@@ -21,7 +21,3 @@ data class BillingUiState(
     val premiumState: PremiumState = PremiumState(),
     val errorMessage: String? = null
 )
-
-fun ProductDetails.defaultOffer(): ProductDetails.SubscriptionOfferDetails? {
-    return subscriptionOfferDetails?.firstOrNull()
-}
