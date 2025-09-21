@@ -17,4 +17,5 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object ThemeChangeView : Screen("themeChangeView", "Theme")
     object OnBoardingOne: Screen("onBoardingOne", "OnBoardingOne")
     object OnBoardingTwo: Screen("onBoardingTwo", "OnBoardingTwo")
+    object Paywall : Screen("paywall", "Pushup Plus")
 }

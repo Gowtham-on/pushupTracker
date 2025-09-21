@@ -28,12 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 
 @Composable
-fun ExpandingFAB(navController: NavHostController, openQuickAddSheet: () -> Unit) {
+fun ExpandingFAB(
+    onStartWorkout: () -> Unit,
+    onQuickAdd: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
@@ -57,7 +58,7 @@ fun ExpandingFAB(navController: NavHostController, openQuickAddSheet: () -> Unit
                 SmallFloatingActionButton(
                     onClick = {
                         expanded = !expanded
-                        navController.navigate(Screen.StartWorkout.route)
+                        onStartWorkout()
                     },
                     containerColor = MaterialTheme.colorScheme.secondary,
                 ) {
@@ -76,7 +77,7 @@ fun ExpandingFAB(navController: NavHostController, openQuickAddSheet: () -> Unit
                 SmallFloatingActionButton(
                     onClick = {
                         expanded = !expanded
-                        openQuickAddSheet()
+                        onQuickAdd()
                     },
                     containerColor = MaterialTheme.colorScheme.secondary
                 ) {

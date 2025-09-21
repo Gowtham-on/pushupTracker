@@ -34,6 +34,7 @@ firebaseCrashlyticsPlugin = "3.0.2"
 workManager = "2.9.1"
 hiltWork = "1.2.0"
 playReview = "2.0.1"
+billing = "6.1.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -83,6 +84,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
+android-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

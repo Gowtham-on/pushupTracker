@@ -56,9 +56,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.database.entity.PushUpEntity
+import com.cmp.pushuptracker.billing.BillingViewModel
 import com.cmp.pushuptracker.ui.components.ExpandingFAB
 import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
+import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.utils.PushupIllustrations
 import com.cmp.pushuptracker.utils.PushupUtils
 import com.cmp.pushuptracker.utils.PreferenceUtil
@@ -88,7 +90,8 @@ import com.google.accompanist.permissions.shouldShowRationale
 fun HomeScreen(
     navController: NavHostController,
     pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>(),
-    userViewmodel: UserViewmodel
+    userViewmodel: UserViewmodel,
+    billingViewModel: BillingViewModel
 ) {
     val pushupData by pushupViewModel.todayData.collectAsState()
     var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
@@ -97,6 +100,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val notificationPermissionState = rememberNotificationPermissionState()
     var showNotificationPrompt by rememberSaveable { mutableStateOf(false) }
+    val billingUiState by billingViewModel.uiState.collectAsState()
+    val isPremium = billingUiState.premiumState.isEntitled
 
     LaunchedEffect(scrollState) {
         var previousValue = scrollState.value
@@ -121,6 +126,12 @@ fun HomeScreen(
         if (notificationPermissionState?.status?.isGranted == true) {
             showNotificationPrompt = false
             PreferenceUtil.markNotificationPermissionAsked(context)
+        }
+    }
+
+    LaunchedEffect(isPremium) {
+        if (!isPremium) {
+            showQuickAddShet = false
         }
     }
 
@@ -207,9 +218,22 @@ fun HomeScreen(
             }
         }
         if (isScrollingUp)
-            ExpandingFAB(navController) {
-                showQuickAddShet = true
-            }
+            ExpandingFAB(
+                onStartWorkout = {
+                    if (isPremium) {
+                        navController.navigate(Screen.StartWorkout.route)
+                    } else {
+                        navController.navigate(Screen.Paywall.route)
+                    }
+                },
+                onQuickAdd = {
+                    if (isPremium) {
+                        showQuickAddShet = true
+                    } else {
+                        navController.navigate(Screen.Paywall.route)
+                    }
+                }
+            )
     }
 }
 

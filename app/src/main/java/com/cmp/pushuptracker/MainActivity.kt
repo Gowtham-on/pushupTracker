@@ -54,12 +54,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cmp.pushuptracker.billing.BillingViewModel
 import com.cmp.pushuptracker.ui.components.HomeScreenShimmer
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
 import com.cmp.pushuptracker.ui.screen.home.HomeScreen
 import com.cmp.pushuptracker.ui.screen.home.StartWorkoutScreen
 import com.cmp.pushuptracker.ui.screen.onBoarding.OnBoardingNavigation
+import com.cmp.pushuptracker.ui.screen.paywall.PaywallScreen
 import com.cmp.pushuptracker.ui.screen.profileScreen.ProfileNavigation
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.ui.PushUpScreen
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
@@ -123,6 +125,7 @@ fun PushUpAppNavigation(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val billingViewModel: BillingViewModel = hiltViewModel()
     Scaffold(
         bottomBar = {
             if (currentRoute != Screen.LivePreviewScreen.route)
@@ -141,7 +144,8 @@ fun PushUpAppNavigation(
                 HomeScreen(
                     navController,
                     pushupViewModel,
-                    userViewmodel = userViewmodel
+                    userViewmodel = userViewmodel,
+                    billingViewModel = billingViewModel
                 )
             }
             composable(Screen.History.route) {
@@ -168,6 +172,9 @@ fun PushUpAppNavigation(
                     livePreviewViewModel,
                     userViewmodel
                 )
+            }
+            composable(Screen.Paywall.route) {
+                PaywallScreen(navController = navController, billingViewModel = billingViewModel)
             }
         }
     }
