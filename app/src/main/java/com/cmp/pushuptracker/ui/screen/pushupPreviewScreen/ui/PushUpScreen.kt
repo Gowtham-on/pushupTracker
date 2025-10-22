@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -137,7 +138,8 @@ fun PushUpScreen(
                 ) {
                     CameraPreview(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .keepScreenOn(),
                         onFrame = { imageProxy ->
                             processImage(imageProxy) { pose ->
                                 if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal) {
