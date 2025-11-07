@@ -42,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     lint {
         baseline = file("lint-baseline.xml")
@@ -110,6 +111,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.mpandroidchart)
     implementation(libs.play.review.ktx)
+    implementation(libs.firebase.config.ktx)
 
 
 }

@@ -1,6 +1,11 @@
 package com.cmp.pushuptracker
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,10 +33,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +56,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -54,6 +65,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cmp.pushuptracker.BuildConfig
 import com.cmp.pushuptracker.analytics.AnalyticsLogger
 import com.cmp.pushuptracker.analytics.analyticsNameForRoute
 import com.cmp.pushuptracker.ui.components.HomeScreenShimmer
@@ -70,8 +82,12 @@ import com.cmp.pushuptracker.utils.PreferenceUtil
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.remoteConfigSettings
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -79,10 +95,14 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 
+    private lateinit var remoteConfig: FirebaseRemoteConfig
+    private var forceUpdatePrompt by mutableStateOf<ForceUpdatePrompt?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         PreferenceUtil.recordAppLaunch(this)
+        initializeRemoteConfig()
         setContent {
             val utilViewmodel = hiltViewModel<UtilViewmodel>()
             val userViewmodel = hiltViewModel<UserViewmodel>()
@@ -122,9 +142,178 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
+            val prompt = forceUpdatePrompt
+            if (prompt != null) {
+                val dismissHandler = if (prompt.blocking) null else {
+                    { dismissOptionalUpdate() }
+                }
+                ForceUpdateDialog(
+                    prompt = prompt,
+                    onUpdateClick = { openStoreListing() },
+                    onDismiss = dismissHandler
+                )
+            }
         }
     }
+
+    private fun initializeRemoteConfig() {
+        remoteConfig = FirebaseRemoteConfig.getInstance()
+        val settings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0 else {
+                TimeUnit.HOURS.toSeconds(REMOTE_CONFIG_FETCH_INTERVAL_HOURS)
+            }
+        }
+        remoteConfig.setConfigSettingsAsync(settings)
+        remoteConfig.setDefaultsAsync(remoteConfigDefaults)
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w(TAG, "Remote Config fetch failed", task.exception)
+                }
+                evaluateForceUpdateRequirement()
+            }.addOnFailureListener {
+                Log.e(TAG, "Failed to fetch remote config", it)
+            }
+    }
+
+    private fun evaluateForceUpdateRequirement() {
+        val minSupportedVersion = remoteConfig.getLong(KEY_MIN_SUPPORTED_VERSION_CODE).toInt()
+        Log.d("MainActivity", "Min supported version: $minSupportedVersion")
+        if (BuildConfig.VERSION_CODE >= minSupportedVersion) {
+            forceUpdatePrompt = null
+            return
+        }
+        val blocking = remoteConfig.getBoolean(KEY_FORCE_UPDATE_BLOCKING)
+        val prompt = ForceUpdatePrompt(
+            title = remoteConfig.getString(KEY_FORCE_UPDATE_TITLE).ifBlank { DEFAULT_FORCE_UPDATE_TITLE },
+            message = remoteConfig.getString(KEY_FORCE_UPDATE_MESSAGE).ifBlank { DEFAULT_FORCE_UPDATE_MESSAGE },
+            ctaLabel = remoteConfig.getString(KEY_FORCE_UPDATE_CTA).ifBlank { DEFAULT_FORCE_UPDATE_CTA },
+            blocking = blocking
+        )
+        forceUpdatePrompt = prompt
+    }
+
+    private fun openStoreListing() {
+        val packageName = packageName
+        val playStoreIntent = Intent(
+            Intent.ACTION_VIEW,
+            "market://details?id=$packageName".toUri()
+        )
+        try {
+            startActivity(playStoreIntent)
+        } catch (activityNotFound: ActivityNotFoundException) {
+            val webIntent = Intent(
+                Intent.ACTION_VIEW,
+                "https://play.google.com/store/apps/details?id=$packageName".toUri()
+            )
+            try {
+                startActivity(webIntent)
+            } catch (error: Exception) {
+                Toast.makeText(this, "Unable to open Play Store listing", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Unable to open Play Store listing", error)
+            }
+        }
+    }
+
+    private fun dismissOptionalUpdate() {
+        forceUpdatePrompt = null
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val KEY_MIN_SUPPORTED_VERSION_CODE = "min_supported_version_code"
+        private const val KEY_FORCE_UPDATE_TITLE = "force_update_title"
+        private const val KEY_FORCE_UPDATE_MESSAGE = "force_update_message"
+        private const val KEY_FORCE_UPDATE_CTA = "force_update_cta"
+        private const val KEY_FORCE_UPDATE_BLOCKING = "force_update_blocking"
+        private const val DEFAULT_FORCE_UPDATE_TITLE = "A shiny new Pushup Tracker is here!"
+        private const val DEFAULT_FORCE_UPDATE_MESSAGE =
+            "We polished a few things to make your workouts smoother. Please grab the latest version to continue."
+        private const val DEFAULT_FORCE_UPDATE_CTA = "Update now"
+        private const val REMOTE_CONFIG_FETCH_INTERVAL_HOURS = 6L
+        private val remoteConfigDefaults = mapOf(
+            KEY_MIN_SUPPORTED_VERSION_CODE to BuildConfig.VERSION_CODE,
+            KEY_FORCE_UPDATE_BLOCKING to true,
+            KEY_FORCE_UPDATE_TITLE to DEFAULT_FORCE_UPDATE_TITLE,
+            KEY_FORCE_UPDATE_MESSAGE to DEFAULT_FORCE_UPDATE_MESSAGE,
+            KEY_FORCE_UPDATE_CTA to DEFAULT_FORCE_UPDATE_CTA
+        )
+    }
 }
+
+private const val OPTIONAL_DISMISS_LABEL = "Later"
+
+@Composable
+private fun ForceUpdateDialog(
+    prompt: ForceUpdatePrompt,
+    onUpdateClick: () -> Unit,
+    onDismiss: (() -> Unit)?
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val containerColor = colorScheme.surfaceColorAtElevation(6.dp)
+    AlertDialog(
+        onDismissRequest = {
+            if (!prompt.blocking) {
+                onDismiss?.invoke()
+            }
+        },
+        title = {
+            Text(
+                text = prompt.title,
+                style = MaterialTheme.typography.titleLarge,
+                color = colorScheme.onSurface
+            )
+        },
+        text = {
+            Text(
+                text = prompt.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onUpdateClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary
+                )
+            ) {
+                Text(prompt.ctaLabel)
+            }
+        },
+        dismissButton = if (!prompt.blocking && onDismiss != null) {
+            {
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = colorScheme.primary
+                    )
+                ) {
+                    Text(OPTIONAL_DISMISS_LABEL)
+                }
+            }
+        } else {
+            null
+        },
+        containerColor = containerColor,
+        titleContentColor = colorScheme.onSurface,
+        textContentColor = colorScheme.onSurfaceVariant,
+        iconContentColor = colorScheme.primary,
+        properties = DialogProperties(
+            dismissOnBackPress = !prompt.blocking,
+            dismissOnClickOutside = !prompt.blocking
+        )
+    )
+}
+
+private data class ForceUpdatePrompt(
+    val title: String,
+    val message: String,
+    val ctaLabel: String,
+    val blocking: Boolean
+)
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
