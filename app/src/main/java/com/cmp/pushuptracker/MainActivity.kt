@@ -54,6 +54,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cmp.pushuptracker.analytics.AnalyticsLogger
+import com.cmp.pushuptracker.analytics.analyticsNameForRoute
 import com.cmp.pushuptracker.ui.components.HomeScreenShimmer
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.history.HistoryScreen
@@ -69,9 +71,13 @@ import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,9 +107,17 @@ class MainActivity : ComponentActivity() {
                                 HomeScreenShimmer()
                             }
                         } else if (isOnboardingCompleted == true) {
-                            PushUpAppNavigation(utilViewmodel, userViewmodel)
+                            PushUpAppNavigation(
+                                utilViewmodel = utilViewmodel,
+                                userViewmodel = userViewmodel,
+                                analyticsLogger = analyticsLogger
+                            )
                         } else if (isOnboardingCompleted != true) {
-                            OnBoardingNavigation(utilViewmodel, userViewmodel)
+                            OnBoardingNavigation(
+                                utilViewmodel = utilViewmodel,
+                                userViewmodel = userViewmodel,
+                                analyticsLogger = analyticsLogger
+                            )
                         }
                     }
                 }
@@ -117,12 +131,21 @@ class MainActivity : ComponentActivity() {
 fun PushUpAppNavigation(
     utilViewmodel: UtilViewmodel,
     userViewmodel: UserViewmodel,
+    analyticsLogger: AnalyticsLogger,
     pushupViewModel: PushupViewModel = hiltViewModel<PushupViewModel>(),
     livePreviewViewModel: LivePreviewViewmodel = hiltViewModel<LivePreviewViewmodel>()
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let {
+            analyticsLogger.logScreenView(
+                screenName = analyticsNameForRoute(it),
+                screenClass = it
+            )
+        }
+    }
     Scaffold(
         bottomBar = {
             if (currentRoute != Screen.LivePreviewScreen.route)
@@ -151,7 +174,8 @@ fun PushUpAppNavigation(
                 ProfileNavigation(
                     utilViewmodel,
                     navController,
-                    userViewmodel
+                    userViewmodel,
+                    analyticsLogger
                 )
             }
             composable(Screen.StartWorkout.route) {

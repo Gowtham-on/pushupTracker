@@ -28,6 +28,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -41,7 +43,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cmp.pushuptracker.analytics.AnalyticsLogger
+import com.cmp.pushuptracker.analytics.analyticsNameForRoute
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.home.GetRedirectSection
@@ -57,10 +62,21 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 fun ProfileNavigation(
     utilViewmodel: UtilViewmodel,
     homeNavigation: NavHostController,
-    userViewmodel: UserViewmodel
+    userViewmodel: UserViewmodel,
+    analyticsLogger: AnalyticsLogger
 ) {
 
     val profileNavController = rememberNavController()
+    val navBackStackEntry by profileNavController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let {
+            analyticsLogger.logScreenView(
+                screenName = analyticsNameForRoute(it),
+                screenClass = it
+            )
+        }
+    }
     AnimatedNavHost(
         contentAlignment = Alignment.TopCenter,
         navController = profileNavController,

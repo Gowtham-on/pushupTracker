@@ -6,20 +6,39 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.PushUpAppNavigation
+import com.cmp.pushuptracker.analytics.AnalyticsLogger
+import com.cmp.pushuptracker.analytics.analyticsNameForRoute
 import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.navigationUtils.Screen.OnBoardingOne
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun OnBoardingNavigation(utilViewmodel: UtilViewmodel, userViewmodel: UserViewmodel) {
+fun OnBoardingNavigation(
+    utilViewmodel: UtilViewmodel,
+    userViewmodel: UserViewmodel,
+    analyticsLogger: AnalyticsLogger
+) {
     val onBoardingNavController = rememberNavController()
+    val navBackStackEntry by onBoardingNavController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let {
+            analyticsLogger.logScreenView(
+                screenName = analyticsNameForRoute(it),
+                screenClass = it
+            )
+        }
+    }
 
     AnimatedNavHost(
         contentAlignment = Alignment.TopCenter,
@@ -57,7 +76,11 @@ fun OnBoardingNavigation(utilViewmodel: UtilViewmodel, userViewmodel: UserViewmo
             OnBoardingScreen2(utilViewmodel, userViewmodel, onBoardingNavController)
         }
         composable (Screen.Home.route) {
-            PushUpAppNavigation(utilViewmodel, userViewmodel)
+            PushUpAppNavigation(
+                utilViewmodel = utilViewmodel,
+                userViewmodel = userViewmodel,
+                analyticsLogger = analyticsLogger
+            )
         }
     }
 }
