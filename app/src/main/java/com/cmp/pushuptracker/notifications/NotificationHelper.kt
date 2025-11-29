@@ -1,11 +1,14 @@
 package com.cmp.pushuptracker.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -35,21 +38,15 @@ object NotificationHelper {
 
     fun showReminder(context: Context, reminderType: String) {
         createChannel(context)
-        val (title, message, notificationId) = when (reminderType) {
-            DailyReminderScheduler.TYPE_MORNING -> Triple(
-                context.getString(R.string.reminder_morning_title),
-                context.getString(R.string.reminder_morning_message),
-                8
-            )
-
-            DailyReminderScheduler.TYPE_EVENING -> Triple(
-                context.getString(R.string.reminder_evening_title),
-                context.getString(R.string.reminder_evening_message),
-                21
-            )
-
+        val notificationId = when (reminderType) {
+            DailyReminderScheduler.TYPE_MORNING -> 8
+            DailyReminderScheduler.TYPE_EVENING -> 21
             else -> return
         }
+
+        val title = context.getString(R.string.reminder_title)
+        val reminderMessages = context.resources.getStringArray(R.array.reminder_messages)
+        val message = reminderMessages.random()
 
         val activityIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -78,6 +75,13 @@ object NotificationHelper {
             .setContentIntent(pendingIntent)
             .build()
 
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 }
