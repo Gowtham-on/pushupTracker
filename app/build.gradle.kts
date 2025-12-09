@@ -16,8 +16,8 @@ android {
         applicationId = "com.cmp.pushuptracker"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "1.0.9"
+        versionCode = 17
+        versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
