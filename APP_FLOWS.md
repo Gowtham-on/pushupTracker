@@ -2,6 +2,31 @@
 
 This document maps the main runtime flows in the Android app so feature work can start from the right files.
 
+## Engagement Feature Direction
+
+The app now uses a personal “Momentum Quest” instead of only a static daily challenge. The feature is designed around three engagement principles from behavior-change and gamification research:
+
+- Personal challenges can increase physical activity, but unfair competition can reduce engagement when users are mismatched.
+- Streaks help form routines, but pressure-only streaks can become discouraging or unhealthy.
+- Motivation is stronger when users get autonomy, competence feedback, and a clear next action.
+
+Product decision:
+- Keep the challenge personal and adaptive rather than social or leaderboard-based.
+- Use a weekly 5-day quest with two rest shields so the app encourages consistency without punishing healthy rest.
+- Use an adaptive daily rep target based on recent activity so the goal feels achievable but still progressive.
+- Show immediate progress, streak, shields, and a simple action button on Home.
+
+Research notes:
+- A large-scale analysis of mobile walking competitions found physical activity increased during challenges, but engagement dropped when participants were mismatched, which argues for personal/adaptive challenges before social competition: https://arxiv.org/abs/1702.07437
+- A large activity-tracking goal study found the first 7 days are predictive of long-term goal success, which supports making the weekly quest visible early and keeping today’s action obvious: https://arxiv.org/abs/1904.02813
+- Self-determination theory emphasizes autonomy, competence, and relatedness; Momentum Quest focuses on autonomy and competence by avoiding forced leaderboards and giving achievable progress feedback: https://en.wikipedia.org/wiki/Self-determination_theory
+- A gamification/flow systematic review found effects vary by context, which is why the feature is implemented as testable, local logic rather than a heavy reward economy: https://arxiv.org/abs/2106.09942
+
+Key files:
+- `app/src/main/java/com/cmp/pushuptracker/utils/MomentumQuest.kt`
+- `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/MomentumQuestSection.kt`
+- `app/src/test/java/com/cmp/pushuptracker/MomentumQuestTest.kt`
+
 ## Startup Flow
 
 1. `MainApplication.onCreate()` initializes Firebase.
@@ -39,7 +64,7 @@ Key files:
 
 `PushUpAppNavigation` owns the primary app routes:
 
-- `Home`: daily stats, quick add, weekly stats, challenge, and calendar.
+- `Home`: Momentum Quest, daily stats, quick add, weekly stats, and calendar.
 - `Statistics`: heatmap and progress charts.
 - `Profile`: stats, permissions, theme selection, privacy, and feature links.
 - `Start Workout`: sets, reps, and rest interval setup.
@@ -83,14 +108,31 @@ Key files:
 ## Home And Quick Add Flow
 
 1. `HomeScreen` observes today's push-up record from `PushupViewModel.todayData`.
-2. It displays reps, duration, estimated calories, weekly stats, calendar, and daily challenge.
+2. It displays reps, duration, estimated calories, weekly stats, calendar, and Momentum Quest.
 3. The app may show notification permission and Play Review prompts from this screen.
 4. The floating action button opens quick add or routes to workout setup.
 5. Quick add collects reps, sets, duration, and date.
 6. `PushupUtils.addPushupInDb()` merges the new entry with any existing session for that date and updates user totals.
 7. User totals are incremented only by the newly added reps and duration.
 
-Key files:
+## Momentum Quest Flow
+
+1. `MomentumQuest.build()` normalizes session dates and groups reps by day.
+2. It derives the current Sunday-to-Saturday week.
+3. It calculates an adaptive daily target from active days in the previous 14 days.
+4. It tracks weekly quest progress toward 5 active days.
+5. It gives 2 rest shields per week, consumed by missed past days.
+6. It calculates the current streak from today or yesterday.
+7. `MomentumQuestSection` renders the card on Home with today progress, weekly dots, streak, shields, and a Start button.
+8. The Start button opens the existing workout setup route.
+
+Quest files:
+- `app/src/main/java/com/cmp/pushuptracker/utils/MomentumQuest.kt`
+- `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/MomentumQuestSection.kt`
+- `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/GetHomeSection.kt`
+- `app/src/test/java/com/cmp/pushuptracker/MomentumQuestTest.kt`
+
+Home files:
 - `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/HomeScreen.kt`
 - `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/GetHomeSection.kt`
 - `app/src/main/java/com/cmp/pushuptracker/ui/screen/home/GetWeeklyGoalsSection.kt`

@@ -57,6 +57,7 @@ import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.R
 import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.ui.components.ExpandingFAB
+import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.screen.home.model.PushupQuickAdd
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupIllustrations
@@ -91,6 +92,7 @@ fun HomeScreen(
     userViewmodel: UserViewmodel
 ) {
     val pushupData by pushupViewModel.todayData.collectAsState()
+    val pushupDataState by pushupViewModel.pushupData.collectAsState()
     val userData = userViewmodel.userData
     var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -170,6 +172,11 @@ fun HomeScreen(
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+                Spacer(Modifier.height(10.dp))
+                MomentumQuestSection(pushupDataState) {
+                    navController.navigate(Screen.StartWorkout.route)
+                }
+                Spacer(Modifier.height(16.dp))
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -199,7 +206,7 @@ fun HomeScreen(
                     )
                 }
                 Spacer(Modifier.height(24.dp))
-                GetHomeSection(userViewmodel, pushupViewModel)
+                GetHomeSection(pushupViewModel)
                 Spacer(Modifier.height(12.dp))
                 if (showQuickAddShet)
                     GetQuickAddSheet(pushupViewModel, userViewmodel) {
