@@ -21,6 +21,7 @@ import androidx.navigation.NavHostController
 import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.ui.components.AppBar
 import com.cmp.pushuptracker.ui.components.InfoBottomSheet
+import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 
 @Composable
@@ -34,7 +35,7 @@ fun HistoryScreen(
     var canShowInfoBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     val datePushupMap by rememberUpdatedState(
-        newValue = pushupDataState.associateBy { it.date }
+        newValue = pushupDataState.associateBy { TimeUtils.toStorageDate(it.date) }
     )
 
     Column {

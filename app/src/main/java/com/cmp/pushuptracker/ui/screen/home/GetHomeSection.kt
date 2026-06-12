@@ -43,6 +43,7 @@ import com.cmp.pushuptracker.ui.components.GetHabitCalendarView
 import com.cmp.pushuptracker.ui.components.InfoBottomSheet
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.getRandomQuote
+import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 
@@ -50,7 +51,7 @@ import com.cmp.pushuptracker.viewmodel.UserViewmodel
 fun GetHomeSection(userViewmodel: UserViewmodel, pushupViewModel: PushupViewModel) {
     val pushupDataState by pushupViewModel.pushupData.collectAsState()
     val datePushupMap by rememberUpdatedState(
-        newValue = pushupDataState.associateBy { it.date }
+        newValue = pushupDataState.associateBy { TimeUtils.toStorageDate(it.date) }
     )
 
     var selectedDate by remember { mutableStateOf<PushUpEntity?>(null) }

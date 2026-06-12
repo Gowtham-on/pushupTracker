@@ -8,7 +8,7 @@ import com.cmp.pushuptracker.database.entity.PushUpEntity
 import com.cmp.pushuptracker.database.entity.UserEntity
 
 
-@Database(entities = [PushUpEntity::class, UserEntity::class], version = 3)
+@Database(entities = [PushUpEntity::class, UserEntity::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pushupDao(): PushUpDao
     abstract fun userDao(): UserDao

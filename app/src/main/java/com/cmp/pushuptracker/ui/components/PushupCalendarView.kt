@@ -62,12 +62,9 @@ fun GetHabitCalendarView(
         var missedDays = 0
 
         val today = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-        // Create a set of dates that user worked out
         val completedDates = list
             .filter { it.reps > 0 }
-            .map { LocalDate.parse(it.date, formatter) }
+            .mapNotNull { TimeUtils.parseAppDate(it.date) }
             .toSet()
 
         var dateToCheck = today
@@ -86,7 +83,7 @@ fun GetHabitCalendarView(
     }
 
     val days = remember {
-        TimeUtils.getDateRangeLastSundayToThisSaturday("dd/MM/YYYY", 13)
+        TimeUtils.getDateRangeLastSundayToThisSaturday(TimeUtils.STORAGE_DATE_PATTERN, 13)
     }
     val daysList = remember {
         listOf(
@@ -201,7 +198,7 @@ fun GetCircularBg(
 ) {
     val context = LocalContext.current
     val isCompleted = remember(date, pushupLogs) {
-        val reps = pushupLogs[date]?.reps ?: 0
+        val reps = pushupLogs[TimeUtils.toStorageDate(date)]?.reps ?: 0
         val complete = reps > 0
         complete
     }
@@ -224,7 +221,7 @@ fun GetCircularBg(
             .clickable(
                 onClick = {
                     if (isCompleted) {
-                        onClick(pushupLogs[date])
+                        onClick(pushupLogs[TimeUtils.toStorageDate(date)])
                         vibrate(context)
                     }
                 },
@@ -232,9 +229,7 @@ fun GetCircularBg(
                 interactionSource = remember { MutableInteractionSource() }
             )
             .then(
-                if (TimeUtils.isToday(
-                        if (date.length == 1) date.take(1) else date.take(2)
-                    )
+                if (TimeUtils.isToday(date)
                 ) {
                     Modifier
                         .border(
@@ -252,7 +247,7 @@ fun GetCircularBg(
                     Modifier.background(
                         color = if (isCompleted == true)
                             MaterialTheme.colorScheme.primary
-                        else if (TimeUtils.isToday(date.take(2))) Color.Red
+                        else if (TimeUtils.isToday(date)) Color.Red
                         else Color.Gray,
                         shape = CircleShape
                     )
@@ -260,7 +255,7 @@ fun GetCircularBg(
             )
     ) {
         Text(
-            date.take(2),
+            TimeUtils.dayOfMonthLabel(date),
             fontFamily = workSansFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
@@ -272,4 +267,3 @@ fun GetCircularBg(
         )
     }
 }
-

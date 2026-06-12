@@ -23,6 +23,13 @@ object PreferenceUtil {
     private const val REVIEW_LAUNCH_THRESHOLD = 5
     private const val NOTIFICATION_PREF = "notification_pref"
     private const val NOTIFICATION_PROMPTED = "notification_prompted"
+    private const val REMINDER_PREF = "reminder_pref"
+    private const val REMINDER_MORNING_ENABLED = "reminder_morning_enabled"
+    private const val REMINDER_EVENING_ENABLED = "reminder_evening_enabled"
+    private const val REMINDER_MORNING_HOUR = "reminder_morning_hour"
+    private const val REMINDER_MORNING_MINUTE = "reminder_morning_minute"
+    private const val REMINDER_EVENING_HOUR = "reminder_evening_hour"
+    private const val REMINDER_EVENING_MINUTE = "reminder_evening_minute"
 
     fun savePushupSettingsPreference(prefName: String, context: Context, enabled: Boolean) {
         context
@@ -119,4 +126,64 @@ object PreferenceUtil {
                 putBoolean(NOTIFICATION_PROMPTED, true)
             }
     }
+
+    fun isReminderEnabled(context: Context, reminderType: String): Boolean {
+        val key = when (reminderType) {
+            ReminderType.MORNING -> REMINDER_MORNING_ENABLED
+            ReminderType.EVENING -> REMINDER_EVENING_ENABLED
+            else -> return false
+        }
+        return context
+            .getSharedPreferences(REMINDER_PREF, Context.MODE_PRIVATE)
+            .getBoolean(key, true)
+    }
+
+    fun setReminderEnabled(context: Context, reminderType: String, enabled: Boolean) {
+        val key = when (reminderType) {
+            ReminderType.MORNING -> REMINDER_MORNING_ENABLED
+            ReminderType.EVENING -> REMINDER_EVENING_ENABLED
+            else -> return
+        }
+        context
+            .getSharedPreferences(REMINDER_PREF, Context.MODE_PRIVATE)
+            .edit {
+                putBoolean(key, enabled)
+            }
+    }
+
+    fun getReminderTime(context: Context, reminderType: String): ReminderTime {
+        val prefs = context.getSharedPreferences(REMINDER_PREF, Context.MODE_PRIVATE)
+        val (hourKey, minuteKey, defaultHour) = when (reminderType) {
+            ReminderType.MORNING -> Triple(REMINDER_MORNING_HOUR, REMINDER_MORNING_MINUTE, 8)
+            ReminderType.EVENING -> Triple(REMINDER_EVENING_HOUR, REMINDER_EVENING_MINUTE, 21)
+            else -> Triple(REMINDER_MORNING_HOUR, REMINDER_MORNING_MINUTE, 8)
+        }
+        return ReminderTime(
+            hour = prefs.getInt(hourKey, defaultHour).coerceIn(0, 23),
+            minute = prefs.getInt(minuteKey, 0).coerceIn(0, 59)
+        )
+    }
+
+    fun setReminderTime(context: Context, reminderType: String, time: ReminderTime) {
+        val (hourKey, minuteKey) = when (reminderType) {
+            ReminderType.MORNING -> REMINDER_MORNING_HOUR to REMINDER_MORNING_MINUTE
+            ReminderType.EVENING -> REMINDER_EVENING_HOUR to REMINDER_EVENING_MINUTE
+            else -> return
+        }
+        context
+            .getSharedPreferences(REMINDER_PREF, Context.MODE_PRIVATE)
+            .edit {
+                putInt(hourKey, time.hour.coerceIn(0, 23))
+                putInt(minuteKey, time.minute.coerceIn(0, 59))
+            }
+    }
+}
+
+data class ReminderTime(val hour: Int, val minute: Int) {
+    fun displayText(): String = "%02d:%02d".format(hour, minute)
+}
+
+object ReminderType {
+    const val MORNING = "morning"
+    const val EVENING = "evening"
 }

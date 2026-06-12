@@ -67,6 +67,8 @@ class LivePreviewViewmodel @Inject constructor(
         setupPushupDataValues(0, 0, 0)
         totalReps = 0
         totalSets = 0
+        currentRep = 0
+        updateCounterDebug(CurrentPhase.UP, 0f, null, true)
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -74,6 +76,18 @@ class LivePreviewViewmodel @Inject constructor(
         private set
 
     var currentPhase = CurrentPhase.UP
+        private set
+
+    var counterPhase by mutableStateOf(CurrentPhase.UP.name)
+        private set
+
+    var lastArmAngle by mutableFloatStateOf(0f)
+        private set
+
+    var lastBodyLineAngle by mutableFloatStateOf(0f)
+        private set
+
+    var isBodyLineOk by mutableStateOf(true)
         private set
 
     var minShoulderY by mutableFloatStateOf(Float.MAX_VALUE)
@@ -85,6 +99,20 @@ class LivePreviewViewmodel @Inject constructor(
             currentRep += 1
         }
         currentPhase = phase
+        counterPhase = phase.name
+    }
+
+    fun updateCounterDebug(
+        phase: CurrentPhase,
+        armAngle: Float,
+        bodyLineAngle: Float?,
+        bodyLineOk: Boolean
+    ) {
+        currentPhase = phase
+        counterPhase = phase.name
+        lastArmAngle = armAngle
+        lastBodyLineAngle = bodyLineAngle ?: 0f
+        isBodyLineOk = bodyLineOk
     }
     //////////////////////////////////////////////////////////////////////////////
 

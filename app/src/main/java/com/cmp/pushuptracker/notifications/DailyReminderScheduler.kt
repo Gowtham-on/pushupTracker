@@ -5,14 +5,16 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.cmp.pushuptracker.utils.PreferenceUtil
+import com.cmp.pushuptracker.utils.ReminderType
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 
 object DailyReminderScheduler {
-    const val TYPE_MORNING = "morning"
-    const val TYPE_EVENING = "evening"
+    const val TYPE_MORNING = ReminderType.MORNING
+    const val TYPE_EVENING = ReminderType.EVENING
     internal const val KEY_REMINDER_TYPE = "reminder_type"
     private const val FLEX_INTERVAL_MINUTES = 15L
 
@@ -22,7 +24,11 @@ object DailyReminderScheduler {
     }
 
     fun scheduleReminder(context: Context, reminderType: String) {
-        val delayMillis = computeDelayMillis(reminderType)
+        if (!PreferenceUtil.isReminderEnabled(context, reminderType)) {
+            WorkManager.getInstance(context).cancelUniqueWork(uniqueName(reminderType))
+            return
+        }
+        val delayMillis = computeDelayMillis(context, reminderType)
         val workRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(1, TimeUnit.DAYS, FLEX_INTERVAL_MINUTES, TimeUnit.MINUTES)
             .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
             .setInputData(workDataOf(KEY_REMINDER_TYPE to reminderType))
@@ -36,13 +42,10 @@ object DailyReminderScheduler {
         )
     }
 
-    private fun computeDelayMillis(reminderType: String): Long {
+    private fun computeDelayMillis(context: Context, reminderType: String): Long {
         val now = ZonedDateTime.now()
-        val targetTime = when (reminderType) {
-            TYPE_MORNING -> LocalTime.of(8, 0)
-            TYPE_EVENING -> LocalTime.of(21, 0)
-            else -> LocalTime.of(8, 0)
-        }
+        val reminderTime = PreferenceUtil.getReminderTime(context, reminderType)
+        val targetTime = LocalTime.of(reminderTime.hour, reminderTime.minute)
 
         var next = now.withHour(targetTime.hour)
             .withMinute(targetTime.minute)

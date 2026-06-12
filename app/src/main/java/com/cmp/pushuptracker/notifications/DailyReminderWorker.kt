@@ -20,7 +20,7 @@ class DailyReminderWorker @AssistedInject constructor(
         val reminderType = inputData.getString(DailyReminderScheduler.KEY_REMINDER_TYPE)
             ?: return Result.success()
 
-        val today = TimeUtils.getTodayDate("dd/MM/yyyy")
+        val today = TimeUtils.todayStorageDate()
         val session = repository.getSessionByDate(today)?.firstOrNull()
         val hasCompletedToday = (session?.reps ?: 0) > 0
 

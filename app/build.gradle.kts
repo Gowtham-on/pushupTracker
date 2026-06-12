@@ -88,7 +88,6 @@ dependencies {
     implementation(libs.androidx.material3.window.size.class1)
 
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.accompanist.navigation.animation)
     implementation(libs.androidx.animation)
     implementation(libs.androidx.material.icons.extended)
 

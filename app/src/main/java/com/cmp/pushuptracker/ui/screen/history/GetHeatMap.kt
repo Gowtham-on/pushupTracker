@@ -79,9 +79,7 @@ private fun generateHeats(datePushupMap: Map<String, PushUpEntity>): List<Heat<P
     return generateSequence(startDate) { date ->
         if (date < curDate) date + DatePeriod(days = 1) else null
     }.map { date ->
-        val dateFormatted = "${date.day.toString().padStart(2, '0')}/${
-            date.month.number.toString().padStart(2, '0')
-        }/${date.year}"
+        val dateFormatted = "${date.year}-${date.month.number.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
         val entity = datePushupMap[dateFormatted]
         val value = entity?.reps?.toDouble() ?: 0.1
         Heat<PushUpEntity>(date, value, entity)

@@ -16,8 +16,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -34,17 +32,10 @@ import com.cmp.pushuptracker.utils.estimatePushupCalories
 
 @Composable
 fun GetStatsSection(userData: UserEntity) {
-    val reps = remember { userData.totalReps }
-    val best = remember { userData.best }
-    val totalDuration = remember { getHrsMinsSecFromSeconds(userData.totalWorkoutDuration) }
-    var totalCaloriesBurnt =
-        remember { estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight) }
-
-    LaunchedEffect(reps) {
-        totalCaloriesBurnt =
-            estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight)
-
-    }
+    val reps = userData.totalReps
+    val best = userData.best
+    val totalDuration = getHrsMinsSecFromSeconds(userData.totalWorkoutDuration)
+    val totalCaloriesBurnt = estimatePushupCalories(reps, userData.totalWorkoutDuration, userData.weight)
     Column {
         Text(
             "Achievements",

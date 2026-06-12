@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @HiltViewModel
 class PushupViewModel @Inject constructor(
@@ -33,7 +33,7 @@ class PushupViewModel @Inject constructor(
         )
 
     // Today’s session as a StateFlow
-    private val today: String = TimeUtils.getTodayDate("dd/MM/yyyy")
+    private val today: String = TimeUtils.todayStorageDate()
     val todayData: StateFlow<PushUpEntity?> = (repository.getSessionByDate(today) ?: flowOf(null))
         .stateIn(
             scope = viewModelScope,
@@ -43,6 +43,7 @@ class PushupViewModel @Inject constructor(
 
     // Selected date handling via a StateFlow
     private val selectedDate = MutableStateFlow<String?>(null)
+    @OptIn(ExperimentalCoroutinesApi::class)
     val selectedDayData: StateFlow<PushUpEntity?> = selectedDate
         .flatMapLatest { date ->
             if (date.isNullOrBlank()) flowOf(null) else (repository.getSessionByDate(date) ?: flowOf(null))
@@ -54,7 +55,7 @@ class PushupViewModel @Inject constructor(
         )
 
     fun setSelectedDate(date: String) {
-        selectedDate.value = date
+        selectedDate.value = TimeUtils.toStorageDate(date)
     }
 
     // Backward-compatible alias
@@ -62,7 +63,7 @@ class PushupViewModel @Inject constructor(
 
     fun addPushupRecord(reps: Int, duration: Int, sets: Int, date: String) {
         viewModelScope.launch {
-            repository.addSession(date, reps, duration, sets)
+            repository.addSession(TimeUtils.toStorageDate(date), reps, duration, sets)
         }
     }
 

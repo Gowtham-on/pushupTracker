@@ -91,6 +91,7 @@ fun HomeScreen(
     userViewmodel: UserViewmodel
 ) {
     val pushupData by pushupViewModel.todayData.collectAsState()
+    val userData = userViewmodel.userData
     var showQuickAddShet by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     var isScrollingUp by remember { mutableStateOf(true) }
@@ -191,7 +192,7 @@ fun HomeScreen(
                         estimatePushupCalories(
                             reps = pushupData?.reps ?: 0,
                             durationSec = pushupData?.duration?.toLong() ?: 0,
-                            weightKg = 70.0,
+                            weightKg = userData.weight.takeIf { it > 0.0 } ?: 70.0,
                         ),
                         "Estimated Calories burnt",
                         illustrationType = PushupIllustrations.THREE
@@ -446,7 +447,7 @@ fun GetQuickAddSheet(
         if (showDatePicker)
             QuickAddCalendar(
                 onSubmit = {
-                    selectedDate = TimeUtils.formatTimestamp(it, "dd/MM/yyyy")
+                    selectedDate = TimeUtils.formatTimestampForStorage(it)
                     pushupViewModel.setSelectedDate(selectedDate)
                 }
             ) {
@@ -513,7 +514,7 @@ fun GetDatePickerField(selectedDate: String, onClick: () -> Unit = {}) {
             .padding(15.dp)
     ) {
         Text(
-            if (selectedDate.isNotBlank()) selectedDate else "Date",
+            if (selectedDate.isNotBlank()) TimeUtils.formatDateForDisplay(selectedDate) else "Date",
             fontFamily = workSansFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp,

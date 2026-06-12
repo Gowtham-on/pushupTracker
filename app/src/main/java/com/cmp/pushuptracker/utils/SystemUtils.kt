@@ -12,7 +12,6 @@ import androidx.core.net.toUri
 import com.cmp.pushuptracker.database.entity.PushUpEntity
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
@@ -62,24 +61,23 @@ fun getWeeklyReps(
     val weekStart = referenceDate
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
 
-    // 2) formatter matching your stored date format
-    val fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-    // 3) for each day Monday→Sunday, sum reps
     val list = (0L until 7L).map { offset ->
         val day = weekStart.plusDays(offset)
-        val dayKey = day.format(fmt)
+        val dayKey = day.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
         sessions
-            .filter { it.date == dayKey }
+            .filter { TimeUtils.toStorageDate(it.date) == dayKey }
             .sumOf { it.reps }
     }
 
     return list
 }
 
-fun calculateWeeklyCount(sessions: List<PushUpEntity>): Int {
+fun calculateWeeklyCount(
+    sessions: List<PushUpEntity>,
+    referenceDate: LocalDate = LocalDate.now()
+): Int {
     var count = 0
-    getWeeklyReps(sessions).map {
+    getWeeklyReps(sessions, referenceDate).map {
         count += it
     }
     return count

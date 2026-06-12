@@ -11,19 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PushUpDao {
-    /**
-     * Returns all sessions ordered by date descending.
-     * We reorder the "dd/MM/yyyy" string as "yyyy MM dd" via substrings.
-     */
-    @Query(
-        """
-    SELECT * FROM pushup_table
-    ORDER BY 
-      substr(date, 7, 4) DESC,  -- year
-      substr(date, 4, 2) DESC,  -- month
-      substr(date, 1, 2) DESC   -- day
-  """
-    )
+    @Query("SELECT * FROM pushup_table ORDER BY date DESC")
     fun getAllSessionsDesc(): Flow<List<PushUpEntity>>
 
     /** Insert or replace if the same date already exists. */

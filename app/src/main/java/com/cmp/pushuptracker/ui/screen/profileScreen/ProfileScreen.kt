@@ -44,6 +44,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.analytics.AnalyticsLogger
 import com.cmp.pushuptracker.analytics.analyticsNameForRoute
@@ -54,7 +55,6 @@ import com.cmp.pushuptracker.ui.screen.home.GetThemeSection
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -77,7 +77,7 @@ fun ProfileNavigation(
             )
         }
     }
-    AnimatedNavHost(
+    NavHost(
         contentAlignment = Alignment.TopCenter,
         navController = profileNavController,
         startDestination = Screen.Profile.route,
@@ -150,6 +150,7 @@ fun ProfileScreen(
         ) {
             GetStatsSection(userData)
             GetPermissionSection()
+            GetReminderSection()
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
             Column {
                 GetThemeSection(profileNavController, utilViewmodel)

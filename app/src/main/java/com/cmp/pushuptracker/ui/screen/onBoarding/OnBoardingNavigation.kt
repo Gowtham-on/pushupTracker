@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.cmp.pushuptracker.PushUpAppNavigation
 import com.cmp.pushuptracker.analytics.AnalyticsLogger
@@ -18,7 +19,6 @@ import com.cmp.pushuptracker.ui.navigationUtils.Screen
 import com.cmp.pushuptracker.ui.navigationUtils.Screen.OnBoardingOne
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import com.cmp.pushuptracker.viewmodel.UtilViewmodel
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -40,7 +40,7 @@ fun OnBoardingNavigation(
         }
     }
 
-    AnimatedNavHost(
+    NavHost(
         contentAlignment = Alignment.TopCenter,
         navController = onBoardingNavController,
         startDestination = OnBoardingOne.route,

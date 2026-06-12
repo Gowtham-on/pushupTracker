@@ -41,7 +41,11 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 @Composable
-fun PushUpCountdownSection(viewModel: LivePreviewViewmodel, navController: NavHostController) {
+fun PushUpCountdownSection(
+    viewModel: LivePreviewViewmodel,
+    navController: NavHostController,
+    onStopWorkout: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp)
@@ -51,7 +55,7 @@ fun PushUpCountdownSection(viewModel: LivePreviewViewmodel, navController: NavHo
         if (viewModel.currentMode == CurrentMode.INTERVAL.ordinal)
             GetTimerSection(viewModel)
         else
-            GetPushUpSection(viewModel, navController)
+            GetPushUpSection(viewModel, navController, onStopWorkout)
 
         Spacer(Modifier.height(15.dp))
     }
@@ -93,7 +97,11 @@ fun GetTimerSection(viewModel: LivePreviewViewmodel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GetPushUpSection(viewModel: LivePreviewViewmodel, navController: NavHostController) {
+fun GetPushUpSection(
+    viewModel: LivePreviewViewmodel,
+    navController: NavHostController,
+    onStopWorkout: () -> Unit
+) {
     var showStopSheet by remember { mutableStateOf(false) }
 
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -215,6 +223,7 @@ fun GetPushUpSection(viewModel: LivePreviewViewmodel, navController: NavHostCont
                     Button(
                         onClick = {
                             hideSheet()
+                            onStopWorkout()
                             navController.popBackStack(
                                 Screen.Home.route,
                                 inclusive = false,

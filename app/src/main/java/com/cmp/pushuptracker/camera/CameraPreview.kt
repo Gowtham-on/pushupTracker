@@ -92,7 +92,11 @@ private val poseDetector = PoseDetection.getClient(
 
 @OptIn(ExperimentalGetImage::class)
 fun processImage(imageProxy: ImageProxy, onPoseDetected: (Pose) -> Unit) {
-    val mediaImage = imageProxy.image ?: return
+    val mediaImage = imageProxy.image
+    if (mediaImage == null) {
+        imageProxy.close()
+        return
+    }
     val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
     poseDetector.process(inputImage)

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import com.cmp.pushuptracker.BuildConfig
 import com.cmp.pushuptracker.camera.CameraPreview
 import com.cmp.pushuptracker.camera.PushUpCounter
 import com.cmp.pushuptracker.camera.processImage
@@ -50,10 +51,11 @@ import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.CurrentMode
 import com.cmp.pushuptracker.ui.screen.pushupPreviewScreen.viewmodel.LivePreviewViewmodel
 import com.cmp.pushuptracker.ui.theme.workSansFamily
 import com.cmp.pushuptracker.utils.PushupUtils
-import com.cmp.pushuptracker.utils.TimeUtils.getTodayDate
+import com.cmp.pushuptracker.utils.TimeUtils
 import com.cmp.pushuptracker.viewmodel.PushupViewModel
 import com.cmp.pushuptracker.viewmodel.UserViewmodel
 import kotlinx.coroutines.delay
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -68,7 +70,7 @@ fun PushUpScreen(
     val counter = remember { PushUpCounter() }
     val selectedDayData by pushupViewModel.selectedDayData.collectAsState()
     val userData = userViewmodel.userData
-    val selectedDate = remember { getTodayDate("dd/MM/yyyy") }
+    val selectedDate = remember { TimeUtils.todayStorageDate() }
 
     // Ensure selectedDayData tracks today's date while on this screen
     LaunchedEffect(selectedDate) {
@@ -118,6 +120,28 @@ fun PushUpScreen(
                 // workoutTimeTaken now has total duration
             }
         }
+    }
+
+    fun saveCurrentWorkout() {
+        val totalReps = livePreviewViewModel.totalReps
+        if (totalReps <= 0) return
+
+        val completedSets = livePreviewViewModel.totalSets
+        val setsToSave = if (completedSets > 0) completedSets else 1
+        val addPushupData = PushupQuickAdd(
+            sets = setsToSave.toString(),
+            reps = totalReps.toString(),
+            min = "0",
+            secs = workoutTimeTaken.toString()
+        )
+        PushupUtils.addPushupInDb(
+            selectedDayData = selectedDayData,
+            selectedDate = selectedDate,
+            userData = userData,
+            addPushupData = addPushupData,
+            userViewmodel = userViewmodel,
+            pushupViewModel = pushupViewModel
+        )
     }
 
     Scaffold {
@@ -187,14 +211,21 @@ fun PushUpScreen(
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Center
                             )
+                        if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal) {
+                            GetRepsCountView(livePreviewViewModel.totalReps)
+                        }
+                        if (BuildConfig.DEBUG) {
+                            PushUpDebugOverlay(livePreviewViewModel)
+                        }
                     }
                 }
 
 
-//                if (livePreviewViewModel.currentMode == CurrentMode.PUSHUP.ordinal)
-//                    GetRepsCountView(reps)
                 if (livePreviewViewModel.currentMode != CurrentMode.COMPLETED.ordinal)
-                    PushUpCountdownSection(livePreviewViewModel, navController)
+                    PushUpCountdownSection(livePreviewViewModel, navController) {
+                        saveCurrentWorkout()
+                        livePreviewViewModel.clearData()
+                    }
                 else
                     BasicAlertDialog(
                         properties = DialogProperties(
@@ -222,21 +253,8 @@ fun PushUpScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    val addPushupData = PushupQuickAdd(
-                                        sets = livePreviewViewModel.sets.toString(),
-                                        reps = (livePreviewViewModel.sets * livePreviewViewModel.reps).toString(),
-                                        min = "0",
-                                        secs = (workoutTimeTaken).toString()
-                                    )
+                                    saveCurrentWorkout()
                                     livePreviewViewModel.clearData()
-                                    PushupUtils.addPushupInDb(
-                                        selectedDayData = selectedDayData,
-                                        selectedDate = selectedDate,
-                                        userData = userData,
-                                        addPushupData = addPushupData,
-                                        userViewmodel = userViewmodel,
-                                        pushupViewModel = pushupViewModel
-                                    )
                                     navController.popBackStack(
                                         Screen.Home.route,
                                         inclusive = false,
@@ -262,5 +280,36 @@ fun PushUpScreen(
                     }
             }
         }
+    }
+}
+
+@Composable
+private fun PushUpDebugOverlay(viewModel: LivePreviewViewmodel) {
+    Column(
+        modifier = Modifier
+            .padding(10.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.Black.copy(alpha = 0.55f))
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = "Phase: ${viewModel.counterPhase}",
+            color = Color.White,
+            fontFamily = workSansFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp
+        )
+        Text(
+            text = "Arm: ${String.format(Locale.getDefault(), "%.1f", viewModel.lastArmAngle)}",
+            color = Color.White,
+            fontFamily = workSansFamily,
+            fontSize = 12.sp
+        )
+        Text(
+            text = "Body: ${String.format(Locale.getDefault(), "%.1f", viewModel.lastBodyLineAngle)} ${if (viewModel.isBodyLineOk) "OK" else "LOW"}",
+            color = if (viewModel.isBodyLineOk) Color.White else Color.Red,
+            fontFamily = workSansFamily,
+            fontSize = 12.sp
+        )
     }
 }
